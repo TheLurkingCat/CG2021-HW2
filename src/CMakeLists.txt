@@ -1,22 +1,34 @@
 project(HW2 C CXX)
 
 set(HW2_SOURCE
+  ${HW2_SOURCE_DIR}/buffer/vertexarray.cpp
   ${HW2_SOURCE_DIR}/camera/camera.cpp
   ${HW2_SOURCE_DIR}/camera/quat_camera.cpp
   ${HW2_SOURCE_DIR}/context_manager.cpp
+  ${HW2_SOURCE_DIR}/shader/shader.cpp
+  ${HW2_SOURCE_DIR}/shape/sphere.cpp
+  ${HW2_SOURCE_DIR}/shader/program.cpp
   ${HW2_SOURCE_DIR}/main.cpp
 )
 
+set(HW2_INCLUDE_DIR ${HW2_SOURCE_DIR}/../include)
+
 set(HW2_HEADER
-  ${HW2_SOURCE_DIR}/../include/camera/camera.h
-  ${HW2_SOURCE_DIR}/../include/camera/quat_camera.h
-  ${HW2_SOURCE_DIR}/../include/shape/shape.h
-  ${HW2_SOURCE_DIR}/../include/context_manager.h
-  ${HW2_SOURCE_DIR}/../include/utils.h
+  ${HW2_INCLUDE_DIR}/filesystem.h
+  ${HW2_INCLUDE_DIR}/buffer/buffer.h
+  ${HW2_INCLUDE_DIR}/buffer/vertexarray.h
+  ${HW2_INCLUDE_DIR}/camera/camera.h
+  ${HW2_INCLUDE_DIR}/camera/quat_camera.h
+  ${HW2_INCLUDE_DIR}/shape/shape.h
+  ${HW2_INCLUDE_DIR}/shape/sphere.h
+  ${HW2_INCLUDE_DIR}/shader/shader.h
+  ${HW2_INCLUDE_DIR}/shader/program.h
+  ${HW2_INCLUDE_DIR}/context_manager.h
+  ${HW2_INCLUDE_DIR}/utils.h
 
 )
 add_executable(HW2 ${HW2_SOURCE} ${HW2_HEADER})
-target_include_directories(HW2 PRIVATE ${HW2_SOURCE_DIR}/../include)
+target_include_directories(HW2 PRIVATE ${HW2_INCLUDE_DIR})
 
 add_dependencies(HW2 glad glfw glm)
 # Can include glfw and glad in arbitrary order

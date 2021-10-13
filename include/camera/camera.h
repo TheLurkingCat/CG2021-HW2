@@ -10,8 +10,10 @@ class Camera {
   explicit Camera(glm::vec3 position);
   virtual ~Camera() = default;
 
-  const float* getProjectionMatrix() const { return glm::value_ptr(projectionMatrix); }
-  const float* getViewMatrix() const { return glm::value_ptr(viewMatrix); }
+  glm::vec4 getPosition() const { return glm::vec4(position, 1.0); }
+  glm::mat4 getProjectionMatrix() const { return projectionMatrix; }
+  glm::mat4 getViewMatrix() const { return viewMatrix; }
+  glm::mat4 getViewProjectionMatrix() const { return projectionMatrix * viewMatrix; }
   void initialize(float aspectRatio);
   virtual void move(GLFWwindow* window) = 0;
   virtual void updateProjection(float aspectRatio) = 0;
