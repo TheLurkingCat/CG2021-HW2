@@ -34,7 +34,16 @@ void main() {
   vec3 normal = normalize(fs_in.Normal);
   // Calculate some directions
   // Directional or Positioal light
-  vec3 lightDirection = lightVector.w == 0.0 ? normalize(lightVector.xyz) : normalize(lightVector.xyz - fs_in.Position);
+  vec3 lightDirection;
+  float attenuation;
+  if (lightVector.w == 0.0) {
+    lightDirection = normalize(lightVector.xyz);
+    attenuation = 1.0;
+  } else {
+    lightDirection = normalize(lightVector.xyz - fs_in.Position);
+    float distance = length(lightVector.xyz - fs_in.Position);
+    attenuation = 1.0 / (1.0 + 0.027 * distance +  0.0028 * (distance * distance));
+  }
   vec3 viewDirection = normalize(viewPosition.xyz - fs_in.Position);
   vec3 reflectDirection = reflect(-lightDirection, normal);
   vec3 halfwayDirection = normalize(lightDirection + viewDirection);
@@ -51,6 +60,6 @@ void main() {
   vec3 perspectiveDivision = fs_in.LightSpacePosition.xyz / fs_in.LightSpacePosition.w;
   float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
 
-  vec3 lighting = (ambient + shadow * (diffuse + specular)) * texture(diffuseTexture, fs_in.TextureCoordinate).rgb;
+  vec3 lighting = attenuation * (ambient + shadow * (diffuse + specular)) * texture(diffuseTexture, fs_in.TextureCoordinate).rgb;
   FragColor = vec4(lighting, 1.0);
 }

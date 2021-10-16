@@ -103,8 +103,8 @@ int main() {
   camera.initialize(OpenGLContext::getAspectRatio());
   glfwSetWindowUserPointer(window, &camera);
   // Setup lights
-  graphics::light::PointLight pointlight(glm::vec3(0, 5, 10));
-  graphics::light::DirectionalLight directionallight(glm::vec3(0, 5, 10));
+  graphics::light::PointLight pointlight(glm::vec3(0, 8, 6));
+  graphics::light::DirectionalLight directionallight(glm::vec3(0, 8, 6));
   pLight = &pointlight;
   dirLight = &directionallight;
   currentLight = pLight;

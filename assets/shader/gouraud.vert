@@ -43,7 +43,16 @@ void main() {
 
   // Calculate some directions
   // Directional or Positioal light
-  vec3 lightDirection = lightVector.w == 0.0 ? normalize(lightVector.xyz) : normalize((lightVector - vertexPosition).xyz);
+  vec3 lightDirection;
+  float attenuation;
+  if (lightVector.w == 0.0) {
+    lightDirection = normalize(lightVector.xyz);
+    attenuation = 1.0;
+  } else {
+    lightDirection = normalize((lightVector - vertexPosition).xyz);
+    float distance = length(lightVector.xyz - vertexPosition.xyz);
+    attenuation = 1.0 / (1.0 + 0.027 * distance + 0.0028 * (distance * distance));
+  }
   vec3 viewDirection = normalize((viewPosition - vertexPosition).xyz);
   vec3 reflectDirection = reflect(-lightDirection, vertexNormal);
 
@@ -57,6 +66,6 @@ void main() {
 
   vec3 perspectiveDivision = lightSpacePosition.xyz / lightSpacePosition.w;
   float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
-  vec3 lighting = (ambient + shadow * (diffuse + specular)) * texture(diffuseTexture, TextureCoordinate_in).rgb;
+  vec3 lighting = attenuation * (ambient + shadow * (diffuse + specular)) * texture(diffuseTexture, TextureCoordinate_in).rgb;
   vertexColor = vec4(lighting, 1.0);
 }
