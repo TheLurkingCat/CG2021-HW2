@@ -60,6 +60,6 @@ void main() {
   vec3 perspectiveDivision = fs_in.LightSpacePosition.xyz / fs_in.LightSpacePosition.w;
   float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
 
-  vec3 lighting = attenuation * (ambient + shadow * (diffuse + specular)) * texture(diffuseTexture, fs_in.TextureCoordinate).rgb;
+  vec3 lighting = (ambient + attenuation * shadow * (diffuse + specular)) * texture(diffuseTexture, fs_in.TextureCoordinate).rgb;
   FragColor = vec4(lighting, 1.0);
 }

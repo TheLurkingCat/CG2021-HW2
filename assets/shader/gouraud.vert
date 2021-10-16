@@ -66,6 +66,6 @@ void main() {
 
   vec3 perspectiveDivision = lightSpacePosition.xyz / lightSpacePosition.w;
   float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
-  vec3 lighting = attenuation * (ambient + shadow * (diffuse + specular)) * texture(diffuseTexture, TextureCoordinate_in).rgb;
+  vec3 lighting = (ambient + attenuation * shadow * (diffuse + specular)) * texture(diffuseTexture, TextureCoordinate_in).rgb;
   vertexColor = vec4(lighting, 1.0);
 }
