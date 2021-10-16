@@ -47,7 +47,7 @@ void main() {
   float attenuation;
   if (lightVector.w == 0.0) {
     lightDirection = normalize(lightVector.xyz);
-    attenuation = 1.0;
+    attenuation = 0.65;
   } else {
     lightDirection = normalize((lightVector - vertexPosition).xyz);
     float distance = length(lightVector.xyz - vertexPosition.xyz);
