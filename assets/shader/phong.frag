@@ -2,32 +2,55 @@
 layout(location = 0) out vec4 FragColor;
 
 in VS_OUT {
-    vec3 FragPos;
-    vec3 Normal;
-    vec2 TexCoords;
+  vec3 Position;
+  vec3 Normal;
+  vec2 TextureCoordinate;
+  vec4 LightSpacePosition;
 } fs_in;
 
-uniform vec4 baseColor;
-uniform vec4 lightPos;
-uniform vec4 viewPos;
+uniform sampler2D diffuseTexture;
+uniform sampler2DShadow shadowMap;
+// Position of the light
+uniform vec4 lightVector;
+// Position of the camera
+uniform vec4 viewPosition;
+
+float calculateShadow(vec3 projectionCoordinate, float normalDotLight) {
+    // Domain transformation to [0, 1]
+    projectionCoordinate = projectionCoordinate * 0.5 + 0.5;
+    // PCF
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for (int x = -1; x <= 1; ++x) {
+        for (int y = -1; y <= 1; ++y) {
+            vec3 textureCoord = vec3(projectionCoordinate.xy + vec2(x, y) * texelSize, projectionCoordinate.z);
+            shadow += texture(shadowMap, textureCoord);
+        }
+    }
+    return 0.25 + shadow / 12.0;
+}
 
 void main() {
-    vec3 color = baseColor.rgb;
-    vec3 normal = normalize(fs_in.Normal);
-    vec3 lightColor = vec3(0.65);
-    // Ambient
-    vec3 ambient = 0.25 * color;
-    // Diffuse
-    vec3 lightDir = normalize(lightPos.xyz);
-    float normaldotlight = dot(normal, lightDir);
-    float diff = max(normaldotlight, 0.0);
-    vec3 diffuse = diff * lightColor;
-    // Specular
-    vec3 viewDir = normalize(viewPos.xyz - fs_in.FragPos);
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), 16.0);
-    vec3 specular = spec * lightColor;
+  vec3 normal = normalize(fs_in.Normal);
+  // Calculate some directions
+  // Directional or Positioal light
+  vec3 lightDirection = lightVector.w == 0.0 ? normalize(lightVector.xyz) : normalize(lightVector.xyz - fs_in.Position);
+  vec3 viewDirection = normalize(viewPosition.xyz - fs_in.Position);
+  vec3 reflectDirection = reflect(-lightDirection, normal);
+  vec3 halfwayDirection = normalize(lightDirection + viewDirection);
+  // Ambient intensity
+  float ambient = 0.1;
+  // Diffuse intensity
+  float normalDotLight = dot(normal, lightDirection);
+  float diffuse = 0.75 * max(normalDotLight, 0.0);
+  // Specular intensity (Phong)
+  // float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 8.0);
+  // Specular intensity (Blinn-Phong)
+  float specular = 0.75 * pow(max(dot(normal, halfwayDirection), 0.0), 8.0);
+  // Shadow
+  vec3 perspectiveDivision = fs_in.LightSpacePosition.xyz / fs_in.LightSpacePosition.w;
+  float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
 
-    vec3 lighting = (ambient + diffuse + specular) * color;
-    FragColor = vec4(lighting, 1.0);
+  vec3 lighting = (ambient + shadow * (diffuse + specular)) * texture(diffuseTexture, fs_in.TextureCoordinate).rgb;
+  FragColor = vec4(lighting, 1.0);
 }

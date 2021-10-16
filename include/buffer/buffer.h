@@ -5,37 +5,36 @@
 
 #include "utils.h"
 namespace graphics::buffer {
-template <GLenum typeT, typename T>
-class Buffer final {
+class Buffer {
  public:
   MOVE_ONLY(Buffer)
-  Buffer() noexcept : handle(0), size_(0) { glGenBuffers(1, &handle); }
-  ~Buffer() noexcept { glDeleteBuffers(1, &handle); }
+  Buffer() noexcept;
+  virtual ~Buffer();
 
-  void allocate(GLsizeiptr size, GLenum usage = GL_STATIC_DRAW) noexcept {
-    bind();
-    size_ = size;
-    glBufferData(typeT, size, nullptr, usage);
-  }
-  void load(const std::vector<T>& data, GLintptr offset = 0) {
-    bind();
-    glBufferSubData(typeT, offset, sizeof(T) * data.size(), data.data());
-  }
-  void allocate_load(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
-    bind();
-    size_ = sizeof(T) * data.size();
-    glBufferData(typeT, sizeof(T) * data.size(), data.data(), usage);
-  }
+  void bind() const noexcept;
+  void allocate(GLsizeiptr _size, GLenum usage = GL_STATIC_DRAW) noexcept;
+  void load(GLintptr offset, GLsizeiptr _size, const void* data) noexcept;
+  void allocate_load(GLsizeiptr _size, const void* data, GLenum usage = GL_STATIC_DRAW) noexcept;
 
-  void bind() const noexcept { glBindBuffer(typeT, handle); }
+  CONSTEXPR_VIRTUAL virtual const char* getTypeName() const noexcept = 0;
+  CONSTEXPR_VIRTUAL virtual GLenum getType() const noexcept = 0;
   GLuint getHandle() const noexcept { return handle; }
-  GLuint size() const noexcept { return size_; }
+  GLuint getSize() const noexcept { return size; }
 
  private:
   GLuint handle;
-  GLuint size_;
+  GLuint size;
 };
-using ArrayBuffer = Buffer<GL_ARRAY_BUFFER, GLfloat>;
-using ElementArrayBuffer = Buffer<GL_ELEMENT_ARRAY_BUFFER, GLuint>;
 
+class ArrayBuffer final : public Buffer {
+ public:
+  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Array buffer"; };
+  CONSTEXPR_VIRTUAL GLenum getType() const noexcept override { return GL_ARRAY_BUFFER; };
+};
+
+class ElementArrayBuffer final : public Buffer {
+ public:
+  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Element array buffer"; };
+  CONSTEXPR_VIRTUAL GLenum getType() const noexcept override { return GL_ELEMENT_ARRAY_BUFFER; };
+};
 }  // namespace graphics::buffer

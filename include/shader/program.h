@@ -1,6 +1,6 @@
 #pragma once
 #include <glad/gl.h>
-#include <glm/glm.hpp>
+#include <glm/fwd.hpp>
 
 #include "utils.h"
 namespace graphics::shader {

@@ -8,7 +8,7 @@
 namespace graphics::camera {
 class QuaternionCamera final : public Camera {
  public:
-  explicit QuaternionCamera(glm::vec3 _position) : Camera(_position), rotation(glm::identity<glm::quat>()) {}
+  explicit QuaternionCamera(const glm::vec3& _position) : Camera(_position), rotation(glm::identity<glm::quat>()) {}
   void move(GLFWwindow* window) override;
   void updateView() override;
   void updateProjection(float aspectRatio) override;

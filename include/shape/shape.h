@@ -9,7 +9,6 @@ class Shape {
  public:
   Shape() noexcept : modelMatrix(glm::identity<glm::mat4>()) {}
   virtual ~Shape() = default;
-  virtual void bindvbo() const noexcept = 0;
   virtual void draw() const noexcept = 0;
   CONSTEXPR_VIRTUAL virtual const char* getTypeName() const noexcept = 0;
 

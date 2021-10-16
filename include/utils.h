@@ -2,14 +2,6 @@
 #include <stdexcept>
 #include <string>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#ifndef M_PI_2
-#define M_PI_2 1.57079632679489661923
-#endif
-
 #ifndef DELETE_COPY
 #define DELETE_COPY(ClassName)           \
   ClassName(const ClassName &) = delete; \
@@ -65,17 +57,6 @@
 
 // Some useful functions
 namespace utils {
-
-template <typename T>
-constexpr inline T PI() {
-  return static_cast<T>(M_PI);
-}
-
-template <typename T>
-constexpr inline T PI_2() {
-  return static_cast<T>(M_PI_2);
-}
-
 #if HAS_CXX20_SUPPORT
 constexpr inline uint32_t log2(uint32_t n) { return std::bit_width(n) - 1; }
 #else

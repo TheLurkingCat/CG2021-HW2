@@ -2,12 +2,11 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 namespace graphics::camera {
 
 class Camera {
  public:
-  explicit Camera(glm::vec3 position);
+  explicit Camera(const glm::vec3& position);
   virtual ~Camera() = default;
 
   glm::vec4 getPosition() const { return glm::vec4(position, 1.0); }
