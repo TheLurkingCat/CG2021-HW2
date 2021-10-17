@@ -6,14 +6,12 @@ in VS_OUT {
   vec3 Normal;
   vec2 TextureCoordinate;
   vec4 LightSpacePosition;
+  flat vec4 lightVector;
+  flat vec4 viewPosition;
 } fs_in;
 
 uniform sampler2D diffuseTexture;
 uniform sampler2DShadow shadowMap;
-// Position of the light
-uniform vec4 lightVector;
-// Position of the camera
-uniform vec4 viewPosition;
 
 float calculateShadow(vec3 projectionCoordinate, float normalDotLight) {
     // Domain transformation to [0, 1]
@@ -36,15 +34,15 @@ void main() {
   // Directional or Positioal light
   vec3 lightDirection;
   float attenuation;
-  if (lightVector.w == 0.0) {
-    lightDirection = normalize(lightVector.xyz);
+  if (fs_in.lightVector.w == 0.0) {
+    lightDirection = normalize(fs_in.lightVector.xyz);
     attenuation = 0.65;
   } else {
-    lightDirection = normalize(lightVector.xyz - fs_in.Position);
-    float distance = length(lightVector.xyz - fs_in.Position);
+    lightDirection = normalize(fs_in.lightVector.xyz - fs_in.Position);
+    float distance = length(fs_in.lightVector.xyz - fs_in.Position);
     attenuation = 1.0 / (1.0 + 0.027 * distance +  0.0028 * (distance * distance));
   }
-  vec3 viewDirection = normalize(viewPosition.xyz - fs_in.Position);
+  vec3 viewDirection = normalize(fs_in.viewPosition.xyz - fs_in.Position);
   vec3 reflectDirection = reflect(-lightDirection, normal);
   vec3 halfwayDirection = normalize(lightDirection + viewDirection);
   // Ambient intensity

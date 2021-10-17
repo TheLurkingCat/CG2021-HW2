@@ -8,17 +8,37 @@ out VS_OUT {
   vec3 Normal;
   vec2 TextureCoordinate;
   vec4 LightSpacePosition;
+  flat vec4 lightVector;
+  flat vec4 viewPosition;
 } vs_out;
 
-uniform mat4 model;
-uniform mat4 viewProjection;
-uniform mat4 lightSpaceMatrix;
-uniform mat4 normalMatrix;
+layout (std140) uniform model {
+  // Model matrix
+  mat4 modelMatrix;
+  // inverse(transpose(model)), precalculate using CPU for efficiency
+  mat4 normalMatrix;
+};
+
+layout (std140) uniform camera {
+  // Projection * View matrix
+  mat4 viewProjectionMatrix;
+  // Position of the camera
+  vec4 viewPosition;
+};
+
+layout (std140) uniform light {
+  // Projection * View matrix
+  mat4 lightSpaceMatrix;
+  // Position of the light
+  vec4 lightVector;
+};
 
 void main() {
-  vs_out.Position = vec3(model * vec4(Position_in, 1.0));
+  vs_out.Position = vec3(modelMatrix * vec4(Position_in, 1.0));
   vs_out.Normal = mat3(normalMatrix) * Normal_in;
   vs_out.TextureCoordinate = TextureCoordinate_in;
   vs_out.LightSpacePosition = lightSpaceMatrix * vec4(vs_out.Position, 1.0);
-  gl_Position = viewProjection * model * vec4(Position_in, 1.0);
+  vs_out.lightVector = lightVector;
+  vs_out.viewPosition = viewPosition;
+  gl_Position = viewProjectionMatrix * modelMatrix * vec4(Position_in, 1.0);
 }

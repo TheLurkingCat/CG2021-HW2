@@ -20,4 +20,14 @@ void Buffer::allocate_load(GLsizeiptr _size, const void* data, GLenum usage) noe
   size = _size;
   glBufferData(getType(), size, data, usage);
 }
+void UniformBuffer::bindUniformBlockIndex(GLuint index, GLuint offset, GLuint _size) const noexcept {
+  bind();
+  glBindBufferRange(GL_UNIFORM_BUFFER, index, handle, offset, _size);
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+void UniformBuffer::bindUniformBlockIndex(GLuint index) const noexcept {
+  bind();
+  glBindBufferBase(GL_UNIFORM_BUFFER, index, handle);
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
 }  // namespace graphics::buffer

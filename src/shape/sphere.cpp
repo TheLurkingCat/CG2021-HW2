@@ -51,6 +51,8 @@ void Sphere::draw() const noexcept {
   glBindVertexArray(0);
 }
 
+SpherePTR Sphere::make_unique() { return std::make_unique<Sphere>(); }
+
 void Sphere::generateVertices(std::vector<GLfloat>& vertices, std::vector<GLuint>& indices) {
   // http://www.songho.ca/opengl/gl_sphere.html#sphere
   vertices.reserve(8 * (g_SphereStacks + 1) * (g_SphereSectors + 1));

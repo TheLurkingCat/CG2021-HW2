@@ -8,4 +8,7 @@ DirectionalLight::DirectionalLight(const glm::vec3& lightVector) noexcept : Ligh
   viewProjection *= glm::lookAt(lightVector, glm::vec3(0), glm::vec3(0, 1, 0));
   setLightSpaceMatrix(viewProjection);
 }
+DirectionalLightPTR DirectionalLight::make_unique(const glm::vec3& lightVector) {
+  return std::make_unique<DirectionalLight>(lightVector);
+}
 }  // namespace graphics::light

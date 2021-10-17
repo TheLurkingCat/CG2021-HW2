@@ -47,6 +47,8 @@ void Plane::draw() const noexcept {
   glBindVertexArray(0);
 }
 
+PlanePTR Plane::make_unique() { return std::make_unique<Plane>(); }
+
 void Plane::generateVertices(std::vector<GLfloat>& vertices, std::vector<GLuint>& indices) {
   vertices = std::vector<GLfloat>{-1, 0, 1,  0, 1, 0, 0, 0, 1, 0, 1,  0, 1, 0, 1, 0,
                                   -1, 0, -1, 0, 1, 0, 0, 1, 1, 0, -1, 0, 1, 0, 1, 1};

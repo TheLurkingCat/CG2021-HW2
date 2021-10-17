@@ -15,6 +15,7 @@ class Sphere final : public Shape {
   static void generateVertices(std::vector<GLfloat>& vertex, std::vector<GLuint>& index);
   void draw() const noexcept override;
   CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Sphere"; }
+  static std::unique_ptr<Sphere> make_unique();
 
  private:
   std::shared_ptr<buffer::VertexArray> vao;
@@ -25,4 +26,5 @@ class Sphere final : public Shape {
   static std::weak_ptr<buffer::ArrayBuffer> vbo_weak;
   static std::weak_ptr<buffer::ElementArrayBuffer> ebo_weak;
 };
+using SpherePTR = std::unique_ptr<Sphere>;
 };  // namespace graphics::shape

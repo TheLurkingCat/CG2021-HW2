@@ -9,9 +9,10 @@ namespace graphics::camera {
 class QuaternionCamera final : public Camera {
  public:
   explicit QuaternionCamera(const glm::vec3& _position) : Camera(_position), rotation(glm::identity<glm::quat>()) {}
-  void move(GLFWwindow* window) override;
+  bool move(GLFWwindow* window) override;
   void updateView() override;
   void updateProjection(float aspectRatio) override;
+  static std::unique_ptr<QuaternionCamera> make_unique(const glm::vec3& _position);
 
  private:
   glm::quat rotation;
@@ -19,4 +20,5 @@ class QuaternionCamera final : public Camera {
   constexpr static float keyboardMoveSpeed = 10.0f;
   constexpr static float mouseMoveSpeed = 0.1f;
 };
+using QuaternionCameraPTR = std::unique_ptr<QuaternionCamera>;
 }  // namespace graphics::camera

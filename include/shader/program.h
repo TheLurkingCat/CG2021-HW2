@@ -31,6 +31,8 @@ class ShaderProgram final {
   void bind() const noexcept;
 
   int getUniformLocation(const char* name) const noexcept { return glGetUniformLocation(handle, name); }
+  GLuint getUniformBlockIndex(const char* name) const noexcept { return glGetUniformBlockIndex(handle, name); }
+  void bindUniformBlock(const char* name, GLuint index) const noexcept;
   void setUniform(const char* name, int i1);
   void setUniform(const char* name, const glm::mat4& mat4);
   void setUniform(const char* name, const glm::vec3& vec3);

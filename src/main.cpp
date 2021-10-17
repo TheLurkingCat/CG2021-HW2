@@ -1,6 +1,10 @@
 #include <algorithm>
+#include <cassert>
 #include <memory>
+#include <utility>
 #include <vector>
+
+#include <iostream>
 
 #include <GLFW/glfw3.h>
 #define GLAD_GL_IMPLEMENTATION
@@ -15,11 +19,20 @@
 
 // Unnamed namespace for global variables
 namespace {
-// Lights
-graphics::light::Light* currentLight;
-graphics::light::PointLight* pLight;
-graphics::light::DirectionalLight* dirLight;
+// Cameras
+graphics::camera::Camera* currentCamera = nullptr;
+// Control variables
+bool isWindowSizeChanged = false;
+bool isLightChanged = false;
+int currentLight = 0;
+int alignSize = 256;
+// Configs
+constexpr int LIGHT_COUNT = 2;
+constexpr int CAMERA_COUNT = 1;
+constexpr int MESH_COUNT = 3;
 }  // namespace
+
+int uboAlign(int i) { return ((i + 1 * (alignSize - 1)) / alignSize) * alignSize; }
 
 void keyCallback(GLFWwindow* window, int key, int, int action, int) {
   // There are three actions: press, release, hold
@@ -31,10 +44,12 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
   }
   switch (key) {
     case GLFW_KEY_H:
-      currentLight = dirLight;
+      currentLight = 0;
+      isLightChanged = true;
       break;
     case GLFW_KEY_P:
-      currentLight = pLight;
+      currentLight = 1;
+      isLightChanged = true;
       break;
     default:
       break;
@@ -43,10 +58,9 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
 
 void resizeCallback(GLFWwindow* window, int width, int height) {
   OpenGLContext::framebufferResizeCallback(window, width, height);
-  auto ptr = static_cast<graphics::camera::Camera*>(glfwGetWindowUserPointer(window));
-  if (ptr != nullptr) {
-    ptr->updateProjection(OpenGLContext::getAspectRatio());
-  }
+  assert(currentCamera != nullptr);
+  currentCamera->updateProjection(OpenGLContext::getAspectRatio());
+  isWindowSizeChanged = true;
 }
 
 int main() {
@@ -71,6 +85,9 @@ int main() {
     fs.fromFile("../assets/shader/phong.frag");
     phongShader.attachLinkDetachShader(vs, fs);
     phongShader.bind();
+    phongShader.bindUniformBlock("model", 0);
+    phongShader.bindUniformBlock("camera", 1);
+    phongShader.bindUniformBlock("light", 2);
     phongShader.setUniform("diffuseTexture", 0);
     phongShader.setUniform("shadowMap", 1);
   }
@@ -81,6 +98,9 @@ int main() {
     fs.fromFile("../assets/shader/gouraud.frag");
     gouraudShader.attachLinkDetachShader(vs, fs);
     gouraudShader.bind();
+    gouraudShader.bindUniformBlock("model", 0);
+    gouraudShader.bindUniformBlock("camera", 1);
+    gouraudShader.bindUniformBlock("light", 2);
     gouraudShader.setUniform("diffuseTexture", 0);
     gouraudShader.setUniform("shadowMap", 1);
   }
@@ -91,7 +111,26 @@ int main() {
     fs.fromFile("../assets/shader/shadow.frag");
     shadowShader.attachLinkDetachShader(vs, fs);
     shadowShader.bind();
+    shadowShader.bindUniformBlock("model", 0);
+    shadowShader.bindUniformBlock("light", 2);
   }
+  graphics::buffer::UniformBuffer meshUBO, cameraUBO, lightUBO;
+  // Calculate UBO alignment size
+  glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignSize);
+  constexpr int perMeshSize = 2 * sizeof(glm::mat4);
+  constexpr int perCameraSize = sizeof(glm::mat4) + sizeof(glm::vec4);
+  constexpr int perLightSize = sizeof(glm::mat4) + sizeof(glm::vec4);
+  int perMeshOffset = uboAlign(perMeshSize);
+  int perCameraOffset = uboAlign(perCameraSize);
+  int perLightOffset = uboAlign(perLightSize);
+  // We have 3 different model
+  meshUBO.allocate(MESH_COUNT * perMeshOffset, GL_DYNAMIC_DRAW);
+  cameraUBO.allocate(CAMERA_COUNT * perCameraOffset, GL_DYNAMIC_DRAW);
+  lightUBO.allocate(LIGHT_COUNT * perLightOffset, GL_DYNAMIC_DRAW);
+  // Default to first data
+  meshUBO.bindUniformBlockIndex(0, 0, perMeshSize);
+  cameraUBO.bindUniformBlockIndex(1, 0, perCameraSize);
+  lightUBO.bindUniformBlockIndex(2, 0, perLightSize);
   // Texture
   graphics::texture::Texture2D baseColor;
   graphics::texture::ShadowMap shadow(1024);
@@ -99,72 +138,93 @@ int main() {
   baseColor.bind(0);
   shadow.bind(1);
   // Setup camera.
-  graphics::camera::QuaternionCamera camera(glm::vec3(0, 0, 15));
-  camera.initialize(OpenGLContext::getAspectRatio());
-  glfwSetWindowUserPointer(window, &camera);
+  std::vector<graphics::camera::CameraPTR> cameras;
+  cameras.emplace_back(graphics::camera::QuaternionCamera::make_unique(glm::vec3(0, 0, 15)));
+  assert(cameras.size() == CAMERA_COUNT);
+  for (int i = 0; i < CAMERA_COUNT; ++i) {
+    int offset = i * perCameraOffset;
+    cameras[i]->initialize(OpenGLContext::getAspectRatio());
+    cameraUBO.load(offset, sizeof(glm::mat4), cameras[i]->getViewProjectionMatrixPTR());
+    cameraUBO.load(offset + sizeof(glm::mat4), sizeof(glm::vec4), cameras[i]->getPositionPTR());
+  }
+  currentCamera = cameras[0].get();
   // Setup lights
-  graphics::light::PointLight pointlight(glm::vec3(0, 8, 6));
-  graphics::light::DirectionalLight directionallight(glm::vec3(0, 8, 6));
-  pLight = &pointlight;
-  dirLight = &directionallight;
-  currentLight = pLight;
+  std::vector<graphics::light::LightPTR> lights;
+  lights.emplace_back(graphics::light::DirectionalLight::make_unique(glm::vec3(0, 8, 6)));
+  lights.emplace_back(graphics::light::PointLight::make_unique(glm::vec3(0, 8, 6)));
+  assert(lights.size() == LIGHT_COUNT);
+  for (int i = 0; i < LIGHT_COUNT; ++i) {
+    int offset = i * perLightOffset;
+    lightUBO.load(offset, sizeof(glm::mat4), lights[i]->getLightSpaceMatrixPTR());
+    lightUBO.load(offset + sizeof(glm::mat4), sizeof(glm::vec4), lights[i]->getLightVectorPTR());
+  }
+  // Meshes
+  std::vector<graphics::shape::ShapePTR> meshes;
+  auto phongSphere = graphics::shape::Sphere::make_unique();
+  auto gouraudSphere = graphics::shape::Sphere::make_unique();
+  auto ground = graphics::shape::Plane::make_unique();
+  {
+    glm::mat4 model = glm::rotate(glm::mat4(1), glm::half_pi<float>(), glm::vec3(1, 0, 0));
+    model = glm::scale(model, glm::vec3(3));
+    phongSphere->setModelMatrix(glm::translate(model, glm::vec3(-1.5, 0, 0)));
+    gouraudSphere->setModelMatrix(glm::translate(model, glm::vec3(1.5, 0, 0)));
 
-  // Objects
-  graphics::shape::Sphere phongSphere, gouraudSphere;
-  glm::mat4 model = glm::rotate(glm::mat4(1), glm::half_pi<float>(), glm::vec3(1, 0, 0));
-  model = glm::scale(model, glm::vec3(3));
-  phongSphere.setModelMatrix(glm::translate(model, glm::vec3(-1.5, 0, 0)));
-  gouraudSphere.setModelMatrix(glm::translate(model, glm::vec3(1.5, 0, 0)));
-
-  graphics::shape::Plane plane;
-  model = glm::scale(glm::mat4(1), glm::vec3(20, 1, 20));
-  model = glm::translate(model, glm::vec3(0, -3.5, 0));
-  plane.setModelMatrix(model);
+    model = glm::scale(glm::mat4(1), glm::vec3(20, 1, 20));
+    model = glm::translate(model, glm::vec3(0, -3.5, 0));
+    ground->setModelMatrix(model);
+  }
+  meshes.emplace_back(std::move(ground));
+  meshes.emplace_back(std::move(gouraudSphere));
+  meshes.emplace_back(std::move(phongSphere));
+  assert(meshes.size() == MESH_COUNT);
+  for (int i = 0; i < MESH_COUNT; ++i) {
+    int offset = i * perMeshOffset;
+    meshUBO.load(offset, sizeof(glm::mat4), meshes[i]->getModelMatrixPTR());
+    meshUBO.load(offset + sizeof(glm::mat4), sizeof(glm::mat4), meshes[i]->getNormalMatrixPTR());
+  }
   // Main rendering loop
   while (!glfwWindowShouldClose(window)) {
     // Polling events.
     glfwPollEvents();
-    camera.move(window);
+    // Update camera's uniforms if camera moves.
+    bool isCameraMove = currentCamera->move(window);
+    if (isCameraMove || isWindowSizeChanged) {
+      isWindowSizeChanged = false;
+      cameraUBO.load(0, sizeof(glm::mat4), currentCamera->getViewProjectionMatrixPTR());
+      cameraUBO.load(sizeof(glm::mat4), sizeof(glm::vec4), currentCamera->getPositionPTR());
+    }
+    // Switch light uniforms if light changes
+    if (isLightChanged) {
+      lightUBO.bindUniformBlockIndex(2, currentLight * perLightOffset, perLightSize);
+      isLightChanged = false;
+    }
     // Render shadow first
     glViewport(0, 0, shadow.getSize(), shadow.getSize());
     glCullFace(GL_FRONT);
     shadowShader.bind();
     shadow.bindFrameBuffer();
     glClear(GL_DEPTH_BUFFER_BIT);
-    shadowShader.setUniform("model", gouraudSphere.getModelMatrix());
-    shadowShader.setUniform("lightSpaceMatrix", currentLight->getLightSpaceMatrix());
-    gouraudSphere.draw();
-    shadowShader.setUniform("model", phongSphere.getModelMatrix());
-    phongSphere.draw();
+    // Update model matrix
+    meshUBO.bindUniformBlockIndex(0, perMeshOffset, perMeshSize);
+    meshes[1]->draw();
+    // Update model matrix
+    meshUBO.bindUniformBlockIndex(0, 2 * perMeshOffset, perMeshSize);
+    meshes[2]->draw();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glCullFace(GL_BACK);
     glViewport(0, 0, OpenGLContext::getWidth(), OpenGLContext::getHeight());
     // GL_XXX_BIT can simply "OR" together to use.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Render gouraud shading sphere
-    glm::mat4 modelMatrix = gouraudSphere.getModelMatrix();
     gouraudShader.bind();
-    gouraudShader.setUniform("model", modelMatrix);
-    gouraudShader.setUniform("viewProjection", camera.getViewProjectionMatrix());
-    gouraudShader.setUniform("normalMatrix", glm::inverse(glm::transpose(modelMatrix)));
-    gouraudShader.setUniform("viewPosition", camera.getPosition());
-    gouraudShader.setUniform("lightVector", currentLight->getLightVector());
-    gouraudShader.setUniform("lightSpaceMatrix", currentLight->getLightSpaceMatrix());
-    gouraudSphere.draw();
+    meshUBO.bindUniformBlockIndex(0, perMeshOffset, perMeshSize);
+    meshes[1]->draw();
     // Render phong shading sphere
-    modelMatrix = phongSphere.getModelMatrix();
     phongShader.bind();
-    phongShader.setUniform("model", modelMatrix);
-    phongShader.setUniform("viewProjection", camera.getViewProjectionMatrix());
-    phongShader.setUniform("normalMatrix", glm::inverse(glm::transpose(modelMatrix)));
-    phongShader.setUniform("viewPosition", camera.getPosition());
-    phongShader.setUniform("lightVector", currentLight->getLightVector());
-    phongShader.setUniform("lightSpaceMatrix", currentLight->getLightSpaceMatrix());
-    phongSphere.draw();
-    modelMatrix = plane.getModelMatrix();
-    phongShader.setUniform("model", modelMatrix);
-    phongShader.setUniform("normalMatrix", glm::inverse(glm::transpose(modelMatrix)));
-    plane.draw();
+    meshUBO.bindUniformBlockIndex(0, 2 * perMeshOffset, perMeshSize);
+    meshes[2]->draw();
+    meshUBO.bindUniformBlockIndex(0, 0, perMeshSize);
+    meshes[0]->draw();
 
 #ifdef __APPLE__
     // Some platform need explicit glFlush

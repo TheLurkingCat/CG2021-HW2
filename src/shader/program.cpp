@@ -18,7 +18,9 @@ void ShaderProgram::link() {
   }
 }
 void ShaderProgram::bind() const noexcept { glUseProgram(handle); }
-
+void ShaderProgram::bindUniformBlock(const char* name, GLuint index) const noexcept {
+  glUniformBlockBinding(handle, getUniformBlockIndex(name), index);
+}
 void ShaderProgram::setUniform(const char* name, int i1) { glUniform1i(getUniformLocation(name), i1); }
 void ShaderProgram::setUniform(const char* name, const glm::mat4& mat4) {
   glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat4));

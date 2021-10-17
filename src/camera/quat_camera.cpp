@@ -1,7 +1,7 @@
 #include "camera/quat_camera.h"
 
 namespace graphics::camera {
-void QuaternionCamera::move(GLFWwindow* window) {
+bool QuaternionCamera::move(GLFWwindow* window) {
   bool ismoved = false;
   // Calculate dt
   static float lastFrameTime = static_cast<float>(glfwGetTime());
@@ -46,6 +46,7 @@ void QuaternionCamera::move(GLFWwindow* window) {
   if (ismoved) {
     updateView();
   }
+  return ismoved;
 }
 
 void QuaternionCamera::updateView() {
@@ -55,6 +56,7 @@ void QuaternionCamera::updateView() {
   up = rotation * original_up;
   right = glm::cross(front, up);
   viewMatrix = glm::lookAt(position, position + front, up);
+  viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 
 void QuaternionCamera::updateProjection(float aspectRatio) {
@@ -62,5 +64,10 @@ void QuaternionCamera::updateProjection(float aspectRatio) {
   constexpr float zNear = 0.1f;
   constexpr float zFar = 100.0f;
   projectionMatrix = glm::perspective(FOV, aspectRatio, zNear, zFar);
+  viewProjectionMatrix = projectionMatrix * viewMatrix;
+}
+
+std::unique_ptr<QuaternionCamera> QuaternionCamera::make_unique(const glm::vec3& _position) {
+  return std::make_unique<QuaternionCamera>(_position);
 }
 }  // namespace graphics::camera
