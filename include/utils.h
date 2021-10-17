@@ -2,6 +2,12 @@
 #include <stdexcept>
 #include <string>
 
+#ifdef __APPLE__
+#ifndef HAS_CXX20_SUPPORT
+#define HAS_CXX20_SUPPORT 0
+#endif
+#endif
+
 #ifndef DELETE_COPY
 #define DELETE_COPY(ClassName)           \
   ClassName(const ClassName &) = delete; \

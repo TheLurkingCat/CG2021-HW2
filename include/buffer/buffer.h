@@ -19,11 +19,11 @@ class Buffer {
   CONSTEXPR_VIRTUAL virtual const char* getTypeName() const noexcept = 0;
   CONSTEXPR_VIRTUAL virtual GLenum getType() const noexcept = 0;
   GLuint getHandle() const noexcept { return handle; }
-  GLuint getSize() const noexcept { return size; }
+  GLsizeiptr getSize() const noexcept { return size; }
 
  protected:
   GLuint handle;
-  GLuint size;
+  GLsizeiptr size;
 };
 
 class ArrayBuffer final : public Buffer {

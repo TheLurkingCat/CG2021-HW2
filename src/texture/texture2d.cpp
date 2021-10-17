@@ -12,7 +12,7 @@ Texture2D::Texture2D() noexcept {}
 void Texture2D::fromFile(const std::filesystem::path& filename) {
   int width, height, nChannels;
   stbi_set_flip_vertically_on_load(1);
-  stbi_uc* data = stbi_load(filename.c_str(), &width, &height, &nChannels, STBI_rgb_alpha);
+  stbi_uc* data = stbi_load(filename.string().c_str(), &width, &height, &nChannels, STBI_rgb_alpha);
   if (data == nullptr) THROW_EXCEPTION(std::runtime_error, "Failed to load texture file");
   bind();
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
