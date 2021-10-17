@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -25,11 +26,13 @@ graphics::camera::Camera* currentCamera = nullptr;
 bool isWindowSizeChanged = false;
 bool isLightChanged = false;
 int currentLight = 0;
+int currentShader = 1;
 int alignSize = 256;
 // Configs
 constexpr int LIGHT_COUNT = 2;
 constexpr int CAMERA_COUNT = 1;
-constexpr int MESH_COUNT = 3;
+constexpr int MESH_COUNT = 2;
+constexpr int SHADER_PROGRAM_COUNT = 3;
 }  // namespace
 
 int uboAlign(int i) { return ((i + 1 * (alignSize - 1)) / alignSize) * alignSize; }
@@ -51,6 +54,12 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
       currentLight = 1;
       isLightChanged = true;
       break;
+    case GLFW_KEY_G:
+      currentShader = 2;
+      break;
+    case GLFW_KEY_B:
+      currentShader = 1;
+      break;
     default:
       break;
   }
@@ -71,48 +80,28 @@ int main() {
   glfwSetKeyCallback(window, keyCallback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetFramebufferSizeCallback(window, resizeCallback);
+  glEnable(GL_PRIMITIVE_RESTART);
+  glPrimitiveRestartIndex(65535);
 #ifndef NDEBUG
   OpenGLContext::printSystemInfo();
   // This is useful if you want to debug your OpenGL API calls.
   OpenGLContext::enableDebugCallback();
 #endif
   // Initialize shader
-  graphics::shader::ShaderProgram phongShader, gouraudShader, shadowShader;
-  {
+  std::vector<graphics::shader::ShaderProgram> shaderPrograms(SHADER_PROGRAM_COUNT);
+  std::string filenames[SHADER_PROGRAM_COUNT] = {"shadow", "phong", "gouraud"};
+  for (int i = 0; i < SHADER_PROGRAM_COUNT; ++i) {
     graphics::shader::VertexShader vs;
     graphics::shader::FragmentShader fs;
-    vs.fromFile("../assets/shader/phong.vert");
-    fs.fromFile("../assets/shader/phong.frag");
-    phongShader.attachLinkDetachShader(vs, fs);
-    phongShader.bind();
-    phongShader.bindUniformBlock("model", 0);
-    phongShader.bindUniformBlock("camera", 1);
-    phongShader.bindUniformBlock("light", 2);
-    phongShader.setUniform("diffuseTexture", 0);
-    phongShader.setUniform("shadowMap", 1);
-  }
-  {
-    graphics::shader::VertexShader vs;
-    graphics::shader::FragmentShader fs;
-    vs.fromFile("../assets/shader/gouraud.vert");
-    fs.fromFile("../assets/shader/gouraud.frag");
-    gouraudShader.attachLinkDetachShader(vs, fs);
-    gouraudShader.bind();
-    gouraudShader.bindUniformBlock("model", 0);
-    gouraudShader.bindUniformBlock("camera", 1);
-    gouraudShader.bindUniformBlock("light", 2);
-    gouraudShader.setUniform("diffuseTexture", 0);
-    gouraudShader.setUniform("shadowMap", 1);
-  }
-  {
-    graphics::shader::VertexShader vs;
-    graphics::shader::FragmentShader fs;
-    vs.fromFile("../assets/shader/shadow.vert");
-    fs.fromFile("../assets/shader/shadow.frag");
-    shadowShader.attachLinkDetachShader(vs, fs);
-    shadowShader.bind();
-    shadowShader.bindUniformBlock("model", 0);
-    shadowShader.bindUniformBlock("light", 2);
+    vs.fromFile("../assets/shader/" + filenames[i] + ".vert");
+    fs.fromFile("../assets/shader/" + filenames[i] + ".frag");
+    shaderPrograms[i].attachLinkDetachShader(vs, fs);
+    shaderPrograms[i].bind();
+    shaderPrograms[i].bindUniformBlock("model", 0);
+    shaderPrograms[i].bindUniformBlock("camera", 1);
+    shaderPrograms[i].bindUniformBlock("light", 2);
+    shaderPrograms[i].setUniform("diffuseTexture", 0);
+    shaderPrograms[i].setUniform("shadowMap", 1);
   }
   graphics::buffer::UniformBuffer meshUBO, cameraUBO, lightUBO;
   // Calculate UBO alignment size
@@ -123,7 +112,6 @@ int main() {
   int perMeshOffset = uboAlign(perMeshSize);
   int perCameraOffset = uboAlign(perCameraSize);
   int perLightOffset = uboAlign(perLightSize);
-  // We have 3 different model
   meshUBO.allocate(MESH_COUNT * perMeshOffset, GL_DYNAMIC_DRAW);
   cameraUBO.allocate(CAMERA_COUNT * perCameraOffset, GL_DYNAMIC_DRAW);
   lightUBO.allocate(LIGHT_COUNT * perLightOffset, GL_DYNAMIC_DRAW);
@@ -132,12 +120,17 @@ int main() {
   cameraUBO.bindUniformBlockIndex(1, 0, perCameraSize);
   lightUBO.bindUniformBlockIndex(2, 0, perLightSize);
   // Texture
+  int maxTextureSize = 1024;
+  // Uncomment the following line if your GPU is very poor
+  glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+  maxTextureSize = std::min(maxTextureSize, 4096);
+  graphics::texture::ShadowMap shadow(maxTextureSize);
   graphics::texture::Texture2D baseColor;
-  graphics::texture::ShadowMap shadow(1024);
+  // This is a 1x1 single color texture
   baseColor.fromColor(glm::vec4(1, 0.5, 0, 1));
   baseColor.bind(0);
   shadow.bind(1);
-  // Setup camera.
+  // Camera
   std::vector<graphics::camera::CameraPTR> cameras;
   cameras.emplace_back(graphics::camera::QuaternionCamera::make_unique(glm::vec3(0, 0, 15)));
   assert(cameras.size() == CAMERA_COUNT);
@@ -148,10 +141,10 @@ int main() {
     cameraUBO.load(offset + sizeof(glm::mat4), sizeof(glm::vec4), cameras[i]->getPositionPTR());
   }
   currentCamera = cameras[0].get();
-  // Setup lights
+  // Lights
   std::vector<graphics::light::LightPTR> lights;
-  lights.emplace_back(graphics::light::DirectionalLight::make_unique(glm::vec3(0, 8, 6)));
-  lights.emplace_back(graphics::light::PointLight::make_unique(glm::vec3(0, 8, 6)));
+  lights.emplace_back(graphics::light::DirectionalLight::make_unique(glm::vec3(0, 4, 6)));
+  lights.emplace_back(graphics::light::PointLight::make_unique(glm::vec3(0, 4, 6)));
   assert(lights.size() == LIGHT_COUNT);
   for (int i = 0; i < LIGHT_COUNT; ++i) {
     int offset = i * perLightOffset;
@@ -160,22 +153,19 @@ int main() {
   }
   // Meshes
   std::vector<graphics::shape::ShapePTR> meshes;
-  auto phongSphere = graphics::shape::Sphere::make_unique();
-  auto gouraudSphere = graphics::shape::Sphere::make_unique();
-  auto ground = graphics::shape::Plane::make_unique();
   {
-    glm::mat4 model = glm::rotate(glm::mat4(1), glm::half_pi<float>(), glm::vec3(1, 0, 0));
-    model = glm::scale(model, glm::vec3(3));
-    phongSphere->setModelMatrix(glm::translate(model, glm::vec3(-1.5, 0, 0)));
-    gouraudSphere->setModelMatrix(glm::translate(model, glm::vec3(1.5, 0, 0)));
-
-    model = glm::scale(glm::mat4(1), glm::vec3(20, 1, 20));
-    model = glm::translate(model, glm::vec3(0, -3.5, 0));
+    auto sphere = graphics::shape::Sphere::make_unique();
+    auto ground = graphics::shape::Plane::make_unique();
+    glm::mat4 model = glm::translate(glm::mat4(1), glm::vec3(-3, 0, 1));
+    model = glm::scale(model, glm::vec3(2));
+    model = glm::rotate(model, glm::half_pi<float>(), glm::vec3(1, 0, 0));
+    sphere->setModelMatrix(model);
+    model = glm::translate(glm::mat4(1), glm::vec3(0, -4, 0));
+    model = glm::scale(model, glm::vec3(25, 1, 25));
     ground->setModelMatrix(model);
+    meshes.emplace_back(std::move(ground));
+    meshes.emplace_back(std::move(sphere));
   }
-  meshes.emplace_back(std::move(ground));
-  meshes.emplace_back(std::move(gouraudSphere));
-  meshes.emplace_back(std::move(phongSphere));
   assert(meshes.size() == MESH_COUNT);
   for (int i = 0; i < MESH_COUNT; ++i) {
     int offset = i * perMeshOffset;
@@ -201,31 +191,25 @@ int main() {
     // Render shadow first
     glViewport(0, 0, shadow.getSize(), shadow.getSize());
     glCullFace(GL_FRONT);
-    shadowShader.bind();
+    shaderPrograms[0].bind();
     shadow.bindFrameBuffer();
     glClear(GL_DEPTH_BUFFER_BIT);
-    // Update model matrix
-    meshUBO.bindUniformBlockIndex(0, perMeshOffset, perMeshSize);
-    meshes[1]->draw();
-    // Update model matrix
-    meshUBO.bindUniformBlockIndex(0, 2 * perMeshOffset, perMeshSize);
-    meshes[2]->draw();
+    for (int i = 0; i < MESH_COUNT; ++i) {
+      // Update model matrix
+      meshUBO.bindUniformBlockIndex(0, i * perMeshOffset, perMeshSize);
+      meshes[i]->draw();
+    }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glCullFace(GL_BACK);
     glViewport(0, 0, OpenGLContext::getWidth(), OpenGLContext::getHeight());
     // GL_XXX_BIT can simply "OR" together to use.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // Render gouraud shading sphere
-    gouraudShader.bind();
-    meshUBO.bindUniformBlockIndex(0, perMeshOffset, perMeshSize);
-    meshes[1]->draw();
-    // Render phong shading sphere
-    phongShader.bind();
-    meshUBO.bindUniformBlockIndex(0, 2 * perMeshOffset, perMeshSize);
-    meshes[2]->draw();
-    meshUBO.bindUniformBlockIndex(0, 0, perMeshSize);
-    meshes[0]->draw();
-
+    // Render all objects
+    shaderPrograms[currentShader].bind();
+    for (int i = 0; i < MESH_COUNT; ++i) {
+      meshUBO.bindUniformBlockIndex(0, i * perMeshOffset, perMeshSize);
+      meshes[i]->draw();
+    }
 #ifdef __APPLE__
     // Some platform need explicit glFlush
     glFlush();
