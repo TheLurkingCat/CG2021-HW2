@@ -1,5 +1,7 @@
 #include "shape/plane.h"
-
+namespace {
+constexpr int g_Subdivision = 20;
+}  // namespace
 namespace graphics::shape {
 
 std::weak_ptr<buffer::VertexArray> Plane::vao_weak;
@@ -50,8 +52,25 @@ void Plane::draw() const noexcept {
 PlanePTR Plane::make_unique() { return std::make_unique<Plane>(); }
 
 void Plane::generateVertices(std::vector<GLfloat>& vertices, std::vector<GLuint>& indices) {
-  vertices = std::vector<GLfloat>{-1, 0, 1,  0, 1, 0, 0, 0, 1, 0, 1,  0, 1, 0, 1, 0,
-                                  -1, 0, -1, 0, 1, 0, 0, 1, 1, 0, -1, 0, 1, 0, 1, 1};
-  indices = std::vector<GLuint>{0, 1, 2, 3};
+  vertices.reserve((g_Subdivision + 1) * (g_Subdivision + 1) * 8);
+  indices.reserve((g_Subdivision) * (2 * g_Subdivision + 3));
+  float step = 2.0f / g_Subdivision;
+  float textureStep = 1.0f / g_Subdivision;
+  for (int i = 0; i < g_Subdivision + 1; ++i) {
+    for (int j = 0; j < g_Subdivision + 1; ++j) {
+      vertices.insert(vertices.end(),
+                      {-1 + j * step, 0, -1 + i * step, 0, 1, 0, 0 + j * textureStep, 1 - i * textureStep});
+    }
+  }
+
+  for (int i = 0; i < g_Subdivision; ++i) {
+    int offset = i * (g_Subdivision + 1);
+    for (int j = 0; j < g_Subdivision + 1; ++j) {
+      indices.emplace_back(offset + j);
+      indices.emplace_back(offset + j + g_Subdivision + 1);
+    }
+    // Primitive restart
+    indices.emplace_back(65535);
+  }
 }
 }  // namespace graphics::shape
