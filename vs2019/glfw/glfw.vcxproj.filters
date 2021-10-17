@@ -60,13 +60,58 @@
     <ClCompile Include="..\..\extern\glfw\src\win32_window.c">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\extern\glfw\src\platform.c">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\extern\glfw\src\null_init.c">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\extern\glfw\src\null_joystick.c">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\extern\glfw\src\null_monitor.c">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\extern\glfw\src\null_window.c">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\extern\glfw\src\win32_module.c">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\extern\glfw\src\internal.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\extern\glfw\src\mappings.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\extern\glfw\src\null_joystick.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\extern\glfw\src\null_platform.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\extern\glfw\src\platform.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\extern\glfw\src\win32_joystick.h">
-      <Filter>來源檔案</Filter>
+      <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="..\..\extern\glfw\src\win32_platform.h">
-      <Filter>來源檔案</Filter>
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\extern\glfw\src\win32_thread.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\extern\glfw\src\win32_time.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\extern\glfw\include\GLFW\glfw3.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\extern\glfw\include\GLFW\glfw3native.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
