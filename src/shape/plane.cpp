@@ -1,7 +1,4 @@
 #include "shape/plane.h"
-namespace {
-constexpr int g_Subdivision = 20;
-}  // namespace
 namespace graphics::shape {
 
 std::weak_ptr<buffer::VertexArray> Plane::vao_weak;
@@ -43,31 +40,65 @@ Plane::Plane() {
   }
 }
 
+Plane::Plane(const std::vector<GLfloat>& vertices, const std::vector<GLuint>& indices) {
+  vao = std::make_shared<buffer::VertexArray>();
+  vbo = std::make_shared<buffer::ArrayBuffer>();
+  ebo = std::make_shared<buffer::ElementArrayBuffer>();
+
+  vbo->allocate_load(vertices.size() * sizeof(GLfloat), vertices.data());
+  ebo->allocate_load(indices.size() * sizeof(GLuint), indices.data());
+
+  vao->bind();
+  vbo->bind();
+  ebo->bind();
+
+  vao->enable(0);
+  vao->setAttributePointer(0, 3, 8, 0);
+  vao->enable(1);
+  vao->setAttributePointer(1, 3, 8, 3);
+  vao->enable(2);
+  vao->setAttributePointer(2, 2, 8, 6);
+
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
 void Plane::draw() const noexcept {
   vao->bind();
-  glDrawElements(GL_TRIANGLE_STRIP, ebo->getSize() / sizeof(GLuint), GL_UNSIGNED_INT, nullptr);
+  GLsizei indexCount = static_cast<GLsizei>(ebo->getSize() / sizeof(GLuint));
+  glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, nullptr);
   glBindVertexArray(0);
 }
 
-PlanePTR Plane::make_unique() { return std::make_unique<Plane>(); }
+void Plane::generateVertices(std::vector<GLfloat>& vertices,
+                             std::vector<GLuint>& indices,
+                             int subdivision,
+                             float width,
+                             float height,
+                             bool scaleTexture) {
+  vertices.reserve((subdivision + 1) * (subdivision + 1) * 8);
+  indices.reserve((subdivision) * (2 * subdivision + 3));
 
-void Plane::generateVertices(std::vector<GLfloat>& vertices, std::vector<GLuint>& indices) {
-  vertices.reserve((g_Subdivision + 1) * (g_Subdivision + 1) * 8);
-  indices.reserve((g_Subdivision) * (2 * g_Subdivision + 3));
-  float step = 2.0f / g_Subdivision;
-  float textureStep = 1.0f / g_Subdivision;
-  for (int i = 0; i < g_Subdivision + 1; ++i) {
-    for (int j = 0; j < g_Subdivision + 1; ++j) {
-      vertices.insert(vertices.end(),
-                      {-1 + j * step, 0, -1 + i * step, 0, 1, 0, 0 + j * textureStep, 1 - i * textureStep});
+  float wStep = 2.0f * width / subdivision;
+  float hStep = 2.0f * height / subdivision;
+  float wTexStep = scaleTexture ? 1.0f / subdivision : width / subdivision;
+  float hTexStep = scaleTexture ? 1.0f / subdivision : height / subdivision;
+  for (int i = 0; i < subdivision + 1; ++i) {
+    for (int j = 0; j < subdivision + 1; ++j) {
+      vertices.insert(vertices.end(), {-width + j * wStep, 0, -height + i * hStep, 0, 1, 0});
+      if (scaleTexture)
+        vertices.insert(vertices.end(), {0 + j * wTexStep, 1 - i * hTexStep});
+      else
+        vertices.insert(vertices.end(), {0 + j * wTexStep, height - i * hTexStep});
     }
   }
 
-  for (int i = 0; i < g_Subdivision; ++i) {
-    int offset = i * (g_Subdivision + 1);
-    for (int j = 0; j < g_Subdivision + 1; ++j) {
+  for (int i = 0; i < subdivision; ++i) {
+    int offset = i * (subdivision + 1);
+    for (int j = 0; j < subdivision + 1; ++j) {
       indices.emplace_back(offset + j);
-      indices.emplace_back(offset + j + g_Subdivision + 1);
+      indices.emplace_back(offset + j + subdivision + 1);
     }
     // Primitive restart
     indices.emplace_back(65535);

@@ -12,14 +12,32 @@ Texture2D::Texture2D() noexcept {}
 void Texture2D::fromFile(const std::filesystem::path& filename) {
   int width, height, nChannels;
   stbi_set_flip_vertically_on_load(1);
-  stbi_uc* data = stbi_load(filename.string().c_str(), &width, &height, &nChannels, STBI_rgb_alpha);
+  stbi_uc* data = stbi_load(filename.string().c_str(), &width, &height, &nChannels, STBI_default);
+  GLenum format = GL_RGBA;
+  switch (nChannels) {
+    case 1:
+      format = GL_RED;
+      break;
+    case 2:
+      format = GL_RG;
+      break;
+    case 3:
+      format = GL_RGB;
+      break;
+    case 4:
+      format = GL_RGBA;
+      break;
+    default:
+      THROW_EXCEPTION(std::runtime_error, "Unknown ");
+  }
+
   if (data == nullptr) THROW_EXCEPTION(std::runtime_error, "Failed to load texture file");
   bind();
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, data);
   glGenerateMipmap(GL_TEXTURE_2D);
   stbi_image_free(data);
 }

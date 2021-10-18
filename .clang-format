@@ -2,5 +2,8 @@
 BasedOnStyle: Google
 IncludeBlocks: Preserve
 ColumnLimit: '120'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+BreakConstructorInitializers: AfterColon
 
 ...

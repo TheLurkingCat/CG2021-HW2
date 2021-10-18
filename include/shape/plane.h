@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <glad/gl.h>
@@ -12,10 +13,20 @@ namespace graphics::shape {
 class Plane final : public Shape {
  public:
   Plane();
-  static void generateVertices(std::vector<GLfloat>& vertex, std::vector<GLuint>& index);
+  Plane(const std::vector<GLfloat>& vertices, const std::vector<GLuint>& indices);
+  static void generateVertices(std::vector<GLfloat>& vertex,
+                               std::vector<GLuint>& index,
+                               int subdivision = 1,
+                               float width = 1,
+                               float height = 1,
+                               bool scaleTexture = true);
+
   void draw() const noexcept override;
   CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Plane"; }
-  static std::unique_ptr<Plane> make_unique();
+  template <typename... Args>
+  static std::unique_ptr<Plane> make_unique(Args&&... args) {
+    return std::make_unique<Plane>(std::forward<Args>(args)...);
+  }
 
  private:
   std::shared_ptr<buffer::VertexArray> vao;

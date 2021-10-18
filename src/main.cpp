@@ -13,7 +13,7 @@
 #undef GLAD_GL_IMPLEMENTATION
 #include <glm/glm.hpp>
 #define STB_IMAGE_IMPLEMENTATION
-#define STBI_ONLY_PNG
+#define STBI_ONLY_JPEG
 #include <stb_image.h>
 #undef STB_IMAGE_IMPLEMENTATION
 #include "graphics.h"
@@ -119,17 +119,11 @@ int main() {
   meshUBO.bindUniformBlockIndex(0, 0, perMeshSize);
   cameraUBO.bindUniformBlockIndex(1, 0, perCameraSize);
   lightUBO.bindUniformBlockIndex(2, 0, perLightSize);
-  // Texture
+  // Get texture information
   int maxTextureSize = 1024;
   // Uncomment the following line if your GPU is very poor
   glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
   maxTextureSize = std::min(maxTextureSize, 4096);
-  graphics::texture::ShadowMap shadow(maxTextureSize);
-  graphics::texture::Texture2D baseColor;
-  // This is a 1x1 single color texture
-  baseColor.fromColor(glm::vec4(1, 0.5, 0, 1));
-  baseColor.bind(0);
-  shadow.bind(1);
   // Camera
   std::vector<graphics::camera::CameraPTR> cameras;
   cameras.emplace_back(graphics::camera::QuaternionCamera::make_unique(glm::vec3(0, 0, 15)));
@@ -151,27 +145,41 @@ int main() {
     lightUBO.load(offset, sizeof(glm::mat4), lights[i]->getLightSpaceMatrixPTR());
     lightUBO.load(offset + sizeof(glm::mat4), sizeof(glm::vec4), lights[i]->getLightVectorPTR());
   }
+  // Texture
+  graphics::texture::ShadowMap shadow(maxTextureSize);
+  graphics::texture::Texture2D colorOrange, wood;
+  // This is a 1x1 single color texture
+  colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
+  wood.fromFile("../assets/texture/wood.jpg");
   // Meshes
   std::vector<graphics::shape::ShapePTR> meshes;
+  std::vector<graphics::texture::Texture*> diffuseTextures;
   {
+    std::vector<GLfloat> vertexData;
+    std::vector<GLuint> indexData;
+    graphics::shape::Plane::generateVertices(vertexData, indexData, 20, 20, 20, false);
     auto sphere = graphics::shape::Sphere::make_unique();
-    auto ground = graphics::shape::Plane::make_unique();
+    auto ground = graphics::shape::Plane::make_unique(vertexData, indexData);
     glm::mat4 model = glm::translate(glm::mat4(1), glm::vec3(-3, 0, 1));
     model = glm::scale(model, glm::vec3(2));
     model = glm::rotate(model, glm::half_pi<float>(), glm::vec3(1, 0, 0));
     sphere->setModelMatrix(model);
     model = glm::translate(glm::mat4(1), glm::vec3(0, -4, 0));
-    model = glm::scale(model, glm::vec3(25, 1, 25));
     ground->setModelMatrix(model);
     meshes.emplace_back(std::move(ground));
+    diffuseTextures.emplace_back(&wood);
     meshes.emplace_back(std::move(sphere));
+    diffuseTextures.emplace_back(&colorOrange);
   }
   assert(meshes.size() == MESH_COUNT);
+  assert(diffuseTextures.size() == MESH_COUNT);
   for (int i = 0; i < MESH_COUNT; ++i) {
     int offset = i * perMeshOffset;
     meshUBO.load(offset, sizeof(glm::mat4), meshes[i]->getModelMatrixPTR());
     meshUBO.load(offset + sizeof(glm::mat4), sizeof(glm::mat4), meshes[i]->getNormalMatrixPTR());
   }
+  // This will not change in rendering loop
+  shadow.bind(1);
   // Main rendering loop
   while (!glfwWindowShouldClose(window)) {
     // Polling events.
@@ -208,6 +216,7 @@ int main() {
     shaderPrograms[currentShader].bind();
     for (int i = 0; i < MESH_COUNT; ++i) {
       meshUBO.bindUniformBlockIndex(0, i * perMeshOffset, perMeshSize);
+      diffuseTextures[i]->bind(0);
       meshes[i]->draw();
     }
 #ifdef __APPLE__
