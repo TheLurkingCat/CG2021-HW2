@@ -31,7 +31,7 @@ int alignSize = 256;
 // Configs
 constexpr int LIGHT_COUNT = 2;
 constexpr int CAMERA_COUNT = 1;
-constexpr int MESH_COUNT = 2;
+constexpr int MESH_COUNT = 3;
 constexpr int SHADER_PROGRAM_COUNT = 3;
 }  // namespace
 
@@ -102,6 +102,8 @@ int main() {
     shaderPrograms[i].bindUniformBlock("light", 2);
     shaderPrograms[i].setUniform("diffuseTexture", 0);
     shaderPrograms[i].setUniform("shadowMap", 1);
+    shaderPrograms[i].setUniform("isCube", 0);
+    shaderPrograms[i].setUniform("diffuseCubeTexture", 2);
   }
   graphics::buffer::UniformBuffer meshUBO, cameraUBO, lightUBO;
   // Calculate UBO alignment size
@@ -137,8 +139,8 @@ int main() {
   currentCamera = cameras[0].get();
   // Lights
   std::vector<graphics::light::LightPTR> lights;
-  lights.emplace_back(graphics::light::DirectionalLight::make_unique(glm::vec3(0, 4, 6)));
-  lights.emplace_back(graphics::light::PointLight::make_unique(glm::vec3(0, 4, 6)));
+  lights.emplace_back(graphics::light::DirectionalLight::make_unique(glm::vec3(8, 6, 6)));
+  lights.emplace_back(graphics::light::PointLight::make_unique(glm::vec3(8, 6, 6)));
   assert(lights.size() == LIGHT_COUNT);
   for (int i = 0; i < LIGHT_COUNT; ++i) {
     int offset = i * perLightOffset;
@@ -148,28 +150,46 @@ int main() {
   // Texture
   graphics::texture::ShadowMap shadow(maxTextureSize);
   graphics::texture::Texture2D colorOrange, wood;
+  graphics::texture::TextureCubeMap dice;
   // This is a 1x1 single color texture
   colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
   wood.fromFile("../assets/texture/wood.jpg");
+  dice.fromFile("../assets/texture/posx.jpg",
+                "../assets/texture/negx.jpg",
+                "../assets/texture/posy.jpg",
+                "../assets/texture/negy.jpg",
+                "../assets/texture/posz.jpg",
+                "../assets/texture/negz.jpg");
   // Meshes
-  std::vector<graphics::shape::ShapePTR> meshes;
+  std::vector<graphics::shape::ShapePTR>
+      meshes;
   std::vector<graphics::texture::Texture*> diffuseTextures;
   {
     std::vector<GLfloat> vertexData;
     std::vector<GLuint> indexData;
-    graphics::shape::Plane::generateVertices(vertexData, indexData, 20, 20, 20, false);
+    graphics::shape::Plane::generateVertices(vertexData, indexData, 40, 20, 20, false);
     auto sphere = graphics::shape::Sphere::make_unique();
+    auto cube = graphics::shape::Cube::make_unique();
     auto ground = graphics::shape::Plane::make_unique(vertexData, indexData);
-    glm::mat4 model = glm::translate(glm::mat4(1), glm::vec3(-3, 0, 1));
+
+    glm::mat4 model = glm::translate(glm::mat4(1), glm::vec3(3, 0, 4));
     model = glm::scale(model, glm::vec3(2));
     model = glm::rotate(model, glm::half_pi<float>(), glm::vec3(1, 0, 0));
     sphere->setModelMatrix(model);
-    model = glm::translate(glm::mat4(1), glm::vec3(0, -4, 0));
+
+    model = glm::translate(glm::mat4(1), glm::vec3(-3, -1, 0));
+    model = glm::scale(model, glm::vec3(2));
+    cube->setModelMatrix(model);
+
+    model = glm::translate(glm::mat4(1), glm::vec3(0, -3, 0));
     ground->setModelMatrix(model);
+
     meshes.emplace_back(std::move(ground));
     diffuseTextures.emplace_back(&wood);
     meshes.emplace_back(std::move(sphere));
     diffuseTextures.emplace_back(&colorOrange);
+    meshes.emplace_back(std::move(cube));
+    diffuseTextures.emplace_back(&wood);
   }
   assert(meshes.size() == MESH_COUNT);
   assert(diffuseTextures.size() == MESH_COUNT);
@@ -180,6 +200,7 @@ int main() {
   }
   // This will not change in rendering loop
   shadow.bind(1);
+  dice.bind(2);
   // Main rendering loop
   while (!glfwWindowShouldClose(window)) {
     // Polling events.
@@ -215,6 +236,11 @@ int main() {
     // Render all objects
     shaderPrograms[currentShader].bind();
     for (int i = 0; i < MESH_COUNT; ++i) {
+      if (meshes[i]->getTypeName()[0] == 'C') {
+        shaderPrograms[currentShader].setUniform("isCube", 1);
+      } else {
+        shaderPrograms[currentShader].setUniform("isCube", 0);
+      }
       meshUBO.bindUniformBlockIndex(0, i * perMeshOffset, perMeshSize);
       diffuseTextures[i]->bind(0);
       meshes[i]->draw();

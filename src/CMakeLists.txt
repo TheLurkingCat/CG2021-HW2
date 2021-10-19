@@ -8,11 +8,12 @@ set(HW2_SOURCE
   ${HW2_SOURCE_DIR}/context_manager.cpp
   ${HW2_SOURCE_DIR}/light/directionallight.cpp
   ${HW2_SOURCE_DIR}/light/pointlight.cpp
-
+  ${HW2_SOURCE_DIR}/shader/program.cpp
   ${HW2_SOURCE_DIR}/shader/shader.cpp
+  ${HW2_SOURCE_DIR}/shape/cube.cpp
   ${HW2_SOURCE_DIR}/shape/plane.cpp
   ${HW2_SOURCE_DIR}/shape/sphere.cpp
-  ${HW2_SOURCE_DIR}/shader/program.cpp
+  ${HW2_SOURCE_DIR}/texture/cubemap.cpp
   ${HW2_SOURCE_DIR}/texture/shadow.cpp
   ${HW2_SOURCE_DIR}/texture/texture.cpp
   ${HW2_SOURCE_DIR}/texture/texture2d.cpp
@@ -29,15 +30,16 @@ set(HW2_HEADER
   ${HW2_INCLUDE_DIR}/context_manager.h
   ${HW2_INCLUDE_DIR}/filesystem.h
   ${HW2_INCLUDE_DIR}/graphics.h
-  ${HW2_INCLUDE_DIR}/light/light.h
   ${HW2_INCLUDE_DIR}/light/directionallight.h
+  ${HW2_INCLUDE_DIR}/light/light.h
   ${HW2_INCLUDE_DIR}/light/pointlight.h
-
   ${HW2_INCLUDE_DIR}/shader/program.h
   ${HW2_INCLUDE_DIR}/shader/shader.h
+  ${HW2_INCLUDE_DIR}/shape/cube.h
   ${HW2_INCLUDE_DIR}/shape/plane.h
   ${HW2_INCLUDE_DIR}/shape/shape.h
   ${HW2_INCLUDE_DIR}/shape/sphere.h
+  ${HW2_INCLUDE_DIR}/texture/cubemap.h
   ${HW2_INCLUDE_DIR}/texture/shadow.h
   ${HW2_INCLUDE_DIR}/texture/texture.h
   ${HW2_INCLUDE_DIR}/texture/texture2d.h

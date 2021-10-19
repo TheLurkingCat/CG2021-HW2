@@ -1,6 +1,5 @@
 #include "texture/texture2d.h"
 #include <cstdint>
-#include <fstream>
 
 #include <stb_image.h>
 #include <glm/gtc/type_ptr.hpp>
