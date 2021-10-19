@@ -10,6 +10,7 @@ out VS_OUT {
   vec4 LightSpacePosition;
   flat vec4 lightVector;
   flat vec4 viewPosition;
+  vec3 rawPosition;
 } vs_out;
 
 layout (std140) uniform model {
@@ -40,5 +41,6 @@ void main() {
   vs_out.LightSpacePosition = lightSpaceMatrix * vec4(vs_out.Position, 1.0);
   vs_out.lightVector = lightVector;
   vs_out.viewPosition = viewPosition;
+  vs_out.rawPosition = mat3(modelMatrix) * Position_in;
   gl_Position = viewProjectionMatrix * modelMatrix * vec4(Position_in, 1.0);
 }

@@ -3,7 +3,9 @@ layout(location = 0) in vec3 Position_in;
 layout(location = 1) in vec3 Normal_in;
 layout(location = 2) in vec2 TextureCoordinate_in;
 // Gouraud shading will calculate color in vs
-out vec4 vertexColor;
+out vec3 rawPosition;
+out float colorFactor;
+out vec2 TextureCoordinate;
 
 layout (std140) uniform model {
   // Model matrix
@@ -25,9 +27,6 @@ layout (std140) uniform light {
   // Position of the light
   vec4 lightVector;
 };
-
-// Texture of object
-uniform sampler2D diffuseTexture;
 // precomputed shadow
 uniform sampler2DShadow shadowMap;
 
@@ -78,6 +77,7 @@ void main() {
 
   vec3 perspectiveDivision = lightSpacePosition.xyz / lightSpacePosition.w;
   float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
-  vec3 lighting = (ambient + attenuation * shadow * (diffuse + specular)) * texture(diffuseTexture, TextureCoordinate_in).rgb;
-  vertexColor = vec4(lighting, 1.0);
+  colorFactor = (ambient + attenuation * shadow * (diffuse + specular));
+  TextureCoordinate = TextureCoordinate_in;
+  rawPosition = mat3(modelMatrix) * Position_in;
 }

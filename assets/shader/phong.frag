@@ -8,9 +8,12 @@ in VS_OUT {
   vec4 LightSpacePosition;
   flat vec4 lightVector;
   flat vec4 viewPosition;
+  vec3 rawPosition;
 } fs_in;
 
 uniform sampler2D diffuseTexture;
+uniform samplerCube diffuseCubeTexture;
+uniform int isCube;
 uniform sampler2DShadow shadowMap;
 
 float calculateShadow(vec3 projectionCoordinate, float normalDotLight) {
@@ -58,6 +61,9 @@ void main() {
   vec3 perspectiveDivision = fs_in.LightSpacePosition.xyz / fs_in.LightSpacePosition.w;
   float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
 
-  vec3 lighting = (ambient + attenuation * shadow * (diffuse + specular)) * texture(diffuseTexture, fs_in.TextureCoordinate).rgb;
+  vec4 diffuseTextureColor = texture(diffuseTexture, fs_in.TextureCoordinate);
+  vec4 diffuseCubeTextureColor = texture(diffuseCubeTexture, fs_in.rawPosition);
+  vec3 color = isCube == 1 ? diffuseCubeTextureColor.rgb : diffuseTextureColor.rgb;
+  vec3 lighting = (ambient + attenuation * shadow * (diffuse + specular)) * color;
   FragColor = vec4(lighting, 1.0);
 }
