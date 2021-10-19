@@ -15,7 +15,8 @@ std::string readFile(const utils::fs::path& filename) {
 
 namespace graphics::shader {
 
-Shader::Shader(GLenum shaderType) noexcept : handle(0) { handle = glCreateShader(shaderType); }
+Shader::Shader(GLenum shaderType) noexcept :
+    handle(glCreateShader(shaderType)) {}
 Shader::~Shader() { glDeleteShader(handle); }
 
 void Shader::fromFile(const utils::fs::path& filename) {

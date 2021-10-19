@@ -1,7 +1,12 @@
 #pragma once
+#include <string>
+#include <unordered_map>
+#include <utility>
+
 #include <glad/gl.h>
 #include <glm/fwd.hpp>
 
+#include "shader.h"
 #include "utils.h"
 namespace graphics::shader {
 class ShaderProgram final {
@@ -9,36 +14,36 @@ class ShaderProgram final {
   MOVE_ONLY(ShaderProgram)
   ShaderProgram() noexcept;
   ~ShaderProgram();
-
-  template <typename... Args>
-  void attachShader(Args&&... args) {
-    (glAttachShader(this->handle, args.getHandle()), ...);
+  void attach(Shader* shader);
+  template <class... Shaders>
+  void attach(Shader* shader, Shaders... shaders) {
+    attach(shader);
+    attach(std::forward<Shaders>(shaders)...);
   }
+  void detach(Shader* shader);
+  template <class... Shaders>
+  void detach(Shader* shader, Shaders... shaders) {
+    detach(shader);
+    detach(std::forward<Shaders>(shaders)...);
+  }
+
   void link();
-  template <typename... Args>
-  void detachShader(Args&&... args) {
-    (glDetachShader(this->handle, args.getHandle()), ...);
-  }
+  bool checkLinkState() const;
 
-  template <typename... Args>
-  void attachLinkDetachShader(Args&&... args) {
-    (glAttachShader(this->handle, args.getHandle()), ...);
-    link();
-    (glDetachShader(this->handle, args.getHandle()), ...);
-  }
+  GLuint getHandle() const;
+  void use() const;
 
-  GLuint getHandle() const noexcept { return handle; }
-  void bind() const noexcept;
-
-  int getUniformLocation(const char* name) const noexcept { return glGetUniformLocation(handle, name); }
-  GLuint getUniformBlockIndex(const char* name) const noexcept { return glGetUniformBlockIndex(handle, name); }
-  void bindUniformBlock(const char* name, GLuint index) const noexcept;
-  void setUniform(const char* name, int i1);
-  void setUniform(const char* name, const glm::mat4& mat4);
-  void setUniform(const char* name, const glm::vec3& vec3);
-  void setUniform(const char* name, const glm::vec4& vec4);
+  GLint getUniformLocation(const char* name) const;
+  GLuint getUniformBlockIndex(const char* name) const;
+  void uniformBlockBinding(const char* name, GLuint binding) const;
+  void uniformBlockBinding(GLuint index, GLuint binding) const;
+  void setUniform(const char* name, GLint i1);
+  void setUniform(GLint location, GLint i1);
 
  private:
+  bool isLinked;
   GLuint handle;
+  mutable std::unordered_map<std::string, GLint> uniforms;
+  mutable std::unordered_map<std::string, GLint> uniformBlocks;
 };
 }  // namespace graphics::shader

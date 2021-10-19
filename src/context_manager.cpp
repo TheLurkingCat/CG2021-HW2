@@ -97,15 +97,15 @@ void printSeverityEnum(GLenum severity) {
   std::cerr << std::endl;
 }
 
-void GLAPIENTRY errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, const GLchar* message,
-                              const void*) {
+void GLAPIENTRY errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, const GLchar* message, const void*) {
   if (id == 131169 ||  // Allocate framebuffer
       id == 131185 ||  // Allocate buffer
       id == 131218 ||  // Shader recompile
       id == 131204     // Texture no base level
   )
     return;
-  std::cerr << std::endl << "Message : " << message << std::endl;
+  std::cerr << std::endl
+            << "Message : " << message << std::endl;
   printSeverityEnum(severity);
   printSourceEnum(source);
   printTypeEnum(type);

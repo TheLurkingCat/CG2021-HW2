@@ -95,15 +95,17 @@ int main() {
     graphics::shader::FragmentShader fs;
     vs.fromFile("../assets/shader/" + filenames[i] + ".vert");
     fs.fromFile("../assets/shader/" + filenames[i] + ".frag");
-    shaderPrograms[i].attachLinkDetachShader(vs, fs);
-    shaderPrograms[i].bind();
-    shaderPrograms[i].bindUniformBlock("model", 0);
-    shaderPrograms[i].bindUniformBlock("camera", 1);
-    shaderPrograms[i].bindUniformBlock("light", 2);
+    shaderPrograms[i].attach(&vs, &fs);
+    shaderPrograms[i].link();
+    shaderPrograms[i].detach(&vs, &fs);
+    shaderPrograms[i].use();
+    shaderPrograms[i].uniformBlockBinding("model", 0);
+    shaderPrograms[i].uniformBlockBinding("camera", 1);
+    shaderPrograms[i].uniformBlockBinding("light", 2);
     shaderPrograms[i].setUniform("diffuseTexture", 0);
     shaderPrograms[i].setUniform("shadowMap", 1);
-    shaderPrograms[i].setUniform("isCube", 0);
     shaderPrograms[i].setUniform("diffuseCubeTexture", 2);
+    shaderPrograms[i].setUniform("isCube", 0);
   }
   graphics::buffer::UniformBuffer meshUBO, cameraUBO, lightUBO;
   // Calculate UBO alignment size
@@ -220,7 +222,7 @@ int main() {
     // Render shadow first
     glViewport(0, 0, shadow.getSize(), shadow.getSize());
     glCullFace(GL_FRONT);
-    shaderPrograms[0].bind();
+    shaderPrograms[0].use();
     shadow.bindFrameBuffer();
     glClear(GL_DEPTH_BUFFER_BIT);
     for (int i = 0; i < MESH_COUNT; ++i) {
@@ -234,7 +236,7 @@ int main() {
     // GL_XXX_BIT can simply "OR" together to use.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Render all objects
-    shaderPrograms[currentShader].bind();
+    shaderPrograms[currentShader].use();
     for (int i = 0; i < MESH_COUNT; ++i) {
       if (meshes[i]->getTypeName()[0] == 'C') {
         shaderPrograms[currentShader].setUniform("isCube", 1);

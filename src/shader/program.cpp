@@ -3,33 +3,67 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace graphics::shader {
-ShaderProgram::ShaderProgram() noexcept : handle(0) { handle = glCreateProgram(); }
+ShaderProgram::ShaderProgram() noexcept :
+    isLinked(false), handle(glCreateProgram()), uniforms(), uniformBlocks() {}
+
 ShaderProgram::~ShaderProgram() { glDeleteProgram(handle); }
+
+void ShaderProgram::attach(Shader* shader) { glAttachShader(handle, shader->getHandle()); }
+void ShaderProgram::detach(Shader* shader) { glDetachShader(handle, shader->getHandle()); }
 
 void ShaderProgram::link() {
   glLinkProgram(handle);
+  isLinked = checkLinkState();
+}
+
+bool ShaderProgram::checkLinkState() const {
   GLint success;
   GLchar infoLog[1024];
   glGetProgramiv(handle, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(handle, 1024, nullptr, infoLog);
-    puts("Failed to link shader program!");
-    puts(infoLog);
+    if (glDebugMessageInsert) {
+      glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH, -1, infoLog);
+    } else {
+      puts("Failed to link shader program!");
+      puts(infoLog);
+    }
   }
+  return success;
 }
-void ShaderProgram::bind() const noexcept { glUseProgram(handle); }
-void ShaderProgram::bindUniformBlock(const char* name, GLuint index) const noexcept {
+
+GLuint ShaderProgram::getHandle() const { return handle; }
+
+void ShaderProgram::use() const {
+  if (isLinked) glUseProgram(handle);
+}
+
+GLint ShaderProgram::getUniformLocation(const char* name) const {
+  auto it = uniforms.find(name);
+  if (it != uniforms.end())
+    return it->second;
+  GLint location = glGetUniformLocation(handle, name);
+  uniforms.insert(std::make_pair(std::string(name), location));
+  return location;
+}
+
+GLuint ShaderProgram::getUniformBlockIndex(const char* name) const {
+  auto it = uniformBlocks.find(name);
+  if (it != uniformBlocks.end())
+    return it->second;
+  GLint location = glGetUniformBlockIndex(handle, name);
+  uniformBlocks.insert(std::make_pair(std::string(name), location));
+  return location;
+}
+
+void ShaderProgram::uniformBlockBinding(const char* name, GLuint uniformBlockBinding) const {
   GLuint blockindex = getUniformBlockIndex(name);
-  if (blockindex != GL_INVALID_INDEX) glUniformBlockBinding(handle, blockindex, index);
+  if (blockindex != GL_INVALID_INDEX) glUniformBlockBinding(handle, blockindex, uniformBlockBinding);
+}
+
+void ShaderProgram::uniformBlockBinding(GLuint uniformBlockIndex, GLuint uniformBlockBinding) const {
+  if (uniformBlockIndex != GL_INVALID_INDEX) glUniformBlockBinding(handle, uniformBlockIndex, uniformBlockBinding);
 }
 void ShaderProgram::setUniform(const char* name, int i1) { glUniform1i(getUniformLocation(name), i1); }
-void ShaderProgram::setUniform(const char* name, const glm::mat4& mat4) {
-  glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat4));
-}
-void ShaderProgram::setUniform(const char* name, const glm::vec3& vec3) {
-  glUniform3fv(getUniformLocation(name), 1, glm::value_ptr(vec3));
-}
-void ShaderProgram::setUniform(const char* name, const glm::vec4& vec4) {
-  glUniform4fv(getUniformLocation(name), 1, glm::value_ptr(vec4));
-}
+void ShaderProgram::setUniform(GLint location, GLint i1) { glUniform1i(location, i1); }
 }  // namespace graphics::shader
