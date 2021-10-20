@@ -41,6 +41,7 @@ class ShaderProgram final {
   void setUniform(GLint location, GLint i1);
 
  private:
+  static GLuint currentBinding;
   bool isLinked;
   GLuint handle;
   mutable std::unordered_map<std::string, GLint> uniforms;

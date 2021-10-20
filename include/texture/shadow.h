@@ -3,11 +3,11 @@
 
 namespace graphics::texture {
 
-class FrameBuffer {
+class Framebuffer {
  public:
-  MOVE_ONLY(FrameBuffer)
-  FrameBuffer() noexcept;
-  ~FrameBuffer();
+  MOVE_ONLY(Framebuffer)
+  Framebuffer() noexcept;
+  ~Framebuffer();
 
   void bind() const;
 
@@ -17,15 +17,14 @@ class FrameBuffer {
 
 class ShadowMap final : public Texture {
  public:
-  MOVE_ONLY(ShadowMap)
-  ShadowMap(unsigned int size);
+  ShadowMap(unsigned int size) noexcept;
   unsigned int getSize() const { return shadowSize; }
-  void bindFrameBuffer() const noexcept { framebuffer.bind(); }
-  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Texture2D (shadow map)"; }
-  CONSTEXPR_VIRTUAL GLenum getType() const noexcept override { return GL_TEXTURE_2D; }
+  void bindFramebuffer() const noexcept { framebuffer.bind(); }
+  CONSTEXPR_VIRTUAL const char* getTypeName() const override { return "Texture2D (shadow map)"; }
+  CONSTEXPR_VIRTUAL GLenum getType() const override { return GL_TEXTURE_2D; }
 
  private:
-  FrameBuffer framebuffer;
+  Framebuffer framebuffer;
   const unsigned int shadowSize;
 };
 }  // namespace graphics::texture

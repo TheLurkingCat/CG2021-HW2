@@ -54,14 +54,9 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
       currentLight = 1;
       isLightChanged = true;
       break;
-    case GLFW_KEY_G:
-      currentShader = 2;
-      break;
-    case GLFW_KEY_B:
-      currentShader = 1;
-      break;
-    default:
-      break;
+    case GLFW_KEY_G: currentShader = 2; break;
+    case GLFW_KEY_B: currentShader = 1; break;
+    default: break;
   }
 }
 
@@ -156,15 +151,10 @@ int main() {
   // This is a 1x1 single color texture
   colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
   wood.fromFile("../assets/texture/wood.jpg");
-  dice.fromFile("../assets/texture/posx.jpg",
-                "../assets/texture/negx.jpg",
-                "../assets/texture/posy.jpg",
-                "../assets/texture/negy.jpg",
-                "../assets/texture/posz.jpg",
-                "../assets/texture/negz.jpg");
+  dice.fromFile("../assets/texture/posx.jpg", "../assets/texture/negx.jpg", "../assets/texture/posy.jpg",
+                "../assets/texture/negy.jpg", "../assets/texture/posz.jpg", "../assets/texture/negz.jpg");
   // Meshes
-  std::vector<graphics::shape::ShapePTR>
-      meshes;
+  std::vector<graphics::shape::ShapePTR> meshes;
   std::vector<graphics::texture::Texture*> diffuseTextures;
   {
     std::vector<GLfloat> vertexData;
@@ -223,7 +213,7 @@ int main() {
     glViewport(0, 0, shadow.getSize(), shadow.getSize());
     glCullFace(GL_FRONT);
     shaderPrograms[0].use();
-    shadow.bindFrameBuffer();
+    shadow.bindFramebuffer();
     glClear(GL_DEPTH_BUFFER_BIT);
     for (int i = 0; i < MESH_COUNT; ++i) {
       // Update model matrix

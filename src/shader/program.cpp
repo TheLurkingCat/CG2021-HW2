@@ -3,6 +3,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace graphics::shader {
+GLuint ShaderProgram::currentBinding = 0;
+
 ShaderProgram::ShaderProgram() noexcept :
     isLinked(false), handle(glCreateProgram()), uniforms(), uniformBlocks() {}
 
@@ -35,7 +37,13 @@ bool ShaderProgram::checkLinkState() const {
 GLuint ShaderProgram::getHandle() const { return handle; }
 
 void ShaderProgram::use() const {
-  if (isLinked) glUseProgram(handle);
+  // NOP if binds to the same shader program.
+  if (handle == currentBinding)
+    return;
+  if (isLinked) {
+    glUseProgram(handle);
+    currentBinding = handle;
+  }
 }
 
 GLint ShaderProgram::getUniformLocation(const char* name) const {

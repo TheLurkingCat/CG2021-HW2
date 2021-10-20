@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <stdexcept>
 #include <string>
 
@@ -33,7 +34,9 @@
 #endif
 
 #ifndef MOVE_ONLY
-#define MOVE_ONLY(ClassName) DELETE_COPY(ClassName) DEFAULT_MOVE(ClassName)
+#define MOVE_ONLY(ClassName) \
+  DELETE_COPY(ClassName)     \
+  DEFAULT_MOVE(ClassName)
 #endif
 
 #ifndef THROW_EXCEPTION
@@ -60,9 +63,9 @@
 #define CONSTEXPR_VIRTUAL
 #endif  // HAS_CXX20_SUPPORT
 #endif  // CONSTEXPR_VIRTUAL
-
 // Some useful functions
 namespace utils {
+namespace fs = std::filesystem;
 #if HAS_CXX20_SUPPORT
 constexpr inline uint32_t log2(uint32_t n) { return std::bit_width(n) - 1; }
 #else

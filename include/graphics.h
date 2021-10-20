@@ -4,7 +4,6 @@
 #include "buffer/buffer.h"
 #include "camera/quat_camera.h"
 #include "context_manager.h"
-#include "filesystem.h"
 #include "light/directionallight.h"
 #include "light/pointlight.h"
 #include "shader/program.h"

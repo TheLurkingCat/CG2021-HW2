@@ -7,6 +7,7 @@
 #include "utils.h"
 
 namespace graphics::light {
+enum class LightType : uint8_t { Point, Directional, Spot };
 class Light {
  public:
   Light(const glm::vec4& lightvector) noexcept : lightVector(lightvector) {}

@@ -1,14 +1,17 @@
 #include "texture/shadow.h"
 
 namespace graphics::texture {
-FrameBuffer::FrameBuffer() noexcept : handle(0) { glGenFramebuffers(1, &handle); }
-FrameBuffer::~FrameBuffer() { glGenFramebuffers(1, &handle); }
-void FrameBuffer::bind() const { glBindFramebuffer(GL_FRAMEBUFFER, handle); }
+Framebuffer::Framebuffer() noexcept :
+    handle(0) { glGenFramebuffers(1, &handle); }
 
-ShadowMap::ShadowMap(unsigned int size) : shadowSize(size) {
+Framebuffer::~Framebuffer() { glGenFramebuffers(1, &handle); }
+
+void Framebuffer::bind() const { glBindFramebuffer(GL_DRAW_FRAMEBUFFER, handle); }
+
+ShadowMap::ShadowMap(unsigned int size) noexcept :
+    shadowSize(size) {
   GLfloat borderColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-  bind();
-
+  bind(15);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -22,7 +25,7 @@ ShadowMap::ShadowMap(unsigned int size) : shadowSize(size) {
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, handle, 0);
   glDrawBuffer(GL_NONE);
   glReadBuffer(GL_NONE);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
 }  // namespace graphics::texture

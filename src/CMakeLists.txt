@@ -28,7 +28,6 @@ set(HW2_HEADER
   ${HW2_INCLUDE_DIR}/camera/camera.h
   ${HW2_INCLUDE_DIR}/camera/quat_camera.h
   ${HW2_INCLUDE_DIR}/context_manager.h
-  ${HW2_INCLUDE_DIR}/filesystem.h
   ${HW2_INCLUDE_DIR}/graphics.h
   ${HW2_INCLUDE_DIR}/light/directionallight.h
   ${HW2_INCLUDE_DIR}/light/light.h

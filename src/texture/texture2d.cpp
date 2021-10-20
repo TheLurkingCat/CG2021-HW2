@@ -5,45 +5,24 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace graphics::texture {
-
-Texture2D::Texture2D() noexcept {}
-
-void Texture2D::fromFile(const std::filesystem::path& filename) {
+void Texture2D::fromFile(const std::filesystem::path& filename) const {
   int width, height, nChannels;
   stbi_set_flip_vertically_on_load(1);
   stbi_uc* data = stbi_load(filename.string().c_str(), &width, &height, &nChannels, STBI_default);
-  GLenum format = GL_RGBA;
-  switch (nChannels) {
-    case 1:
-      format = GL_RED;
-      break;
-    case 2:
-      format = GL_RG;
-      break;
-    case 3:
-      format = GL_RGB;
-      break;
-    case 4:
-      format = GL_RGBA;
-      break;
-    default:
-      THROW_EXCEPTION(std::runtime_error, "Unknown ");
-  }
-
   if (data == nullptr) THROW_EXCEPTION(std::runtime_error, "Failed to load texture file");
-  bind();
+  bind(15);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, getColorFormat(nChannels), GL_UNSIGNED_BYTE, data);
   glGenerateMipmap(GL_TEXTURE_2D);
   stbi_image_free(data);
 }
 
-void Texture2D::fromColor(const glm::vec4& color) {
+void Texture2D::fromColor(const glm::vec4& color) const {
   glm::u8vec4 colorByte = glm::round(255.0f * color);
-  bind();
+  bind(15);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
