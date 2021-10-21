@@ -23,40 +23,35 @@ class Shader {
 
 class ComputeShader final : public Shader {
  public:
-  ComputeShader() noexcept :
-      Shader(GL_COMPUTE_SHADER) {}
+  ComputeShader() noexcept : Shader(GL_COMPUTE_SHADER) {}
   CONSTEXPR_VIRTUAL const char* getTypeName() const override { return "Compute shader"; }
   CONSTEXPR_VIRTUAL GLenum getType() const override { return GL_COMPUTE_SHADER; }
 };
 
 class VertexShader final : public Shader {
  public:
-  VertexShader() noexcept :
-      Shader(GL_VERTEX_SHADER) {}
+  VertexShader() noexcept : Shader(GL_VERTEX_SHADER) {}
   CONSTEXPR_VIRTUAL const char* getTypeName() const override { return "Vertex shader"; }
   CONSTEXPR_VIRTUAL GLenum getType() const override { return GL_VERTEX_SHADER; }
 };
 
 class TessControlShader final : public Shader {
  public:
-  TessControlShader() noexcept :
-      Shader(GL_TESS_CONTROL_SHADER) {}
+  TessControlShader() noexcept : Shader(GL_TESS_CONTROL_SHADER) {}
   CONSTEXPR_VIRTUAL const char* getTypeName() const override { return "Tessellation control shader"; }
   CONSTEXPR_VIRTUAL GLenum getType() const override { return GL_TESS_CONTROL_SHADER; }
 };
 
 class TessEvaluationShader final : public Shader {
  public:
-  TessEvaluationShader() noexcept :
-      Shader(GL_TESS_EVALUATION_SHADER) {}
+  TessEvaluationShader() noexcept : Shader(GL_TESS_EVALUATION_SHADER) {}
   CONSTEXPR_VIRTUAL const char* getTypeName() const override { return "Tessellation evaluation shader"; }
   CONSTEXPR_VIRTUAL GLenum getType() const override { return GL_TESS_EVALUATION_SHADER; }
 };
 
 class GeometryShader final : public Shader {
  public:
-  GeometryShader() noexcept :
-      Shader(GL_GEOMETRY_SHADER) {}
+  GeometryShader() noexcept : Shader(GL_GEOMETRY_SHADER) {}
   CONSTEXPR_VIRTUAL const char* getTypeName() const override { return "Geometry shader"; }
   CONSTEXPR_VIRTUAL GLenum getType() const override { return GL_GEOMETRY_SHADER; }
 };
@@ -64,8 +59,7 @@ class GeometryShader final : public Shader {
 class FragmentShader final : public Shader {
  public:
   MOVE_ONLY(FragmentShader)
-  FragmentShader() noexcept :
-      Shader(GL_FRAGMENT_SHADER) {}
+  FragmentShader() noexcept : Shader(GL_FRAGMENT_SHADER) {}
   CONSTEXPR_VIRTUAL const char* getTypeName() const override { return "Fragment shader"; }
   CONSTEXPR_VIRTUAL GLenum getType() const override { return GL_FRAGMENT_SHADER; }
 };

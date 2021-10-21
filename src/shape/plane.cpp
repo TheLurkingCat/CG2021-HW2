@@ -64,7 +64,7 @@ Plane::Plane(const std::vector<GLfloat>& vertices, const std::vector<GLuint>& in
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Plane::draw() const noexcept {
+void Plane::draw() const {
   vao->bind();
   GLsizei indexCount = static_cast<GLsizei>(ebo->getSize() / sizeof(GLuint));
   glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, nullptr);

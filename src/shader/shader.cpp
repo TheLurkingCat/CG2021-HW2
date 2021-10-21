@@ -7,7 +7,8 @@ std::string readFile(const utils::fs::path& filename) {
   if (!shaderFile) {
     std::string err = "Cannot open shader file: " + filename.string();
     if (glDebugMessageInsert) {
-      glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH, -1, err.c_str());
+      glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH, -1,
+                           err.c_str());
     } else {
       puts(err.c_str());
     }
@@ -19,8 +20,7 @@ std::string readFile(const utils::fs::path& filename) {
 
 namespace graphics::shader {
 
-Shader::Shader(GLenum shaderType) noexcept :
-    handle(glCreateShader(shaderType)) {}
+Shader::Shader(GLenum shaderType) noexcept : handle(glCreateShader(shaderType)) {}
 Shader::~Shader() { glDeleteShader(handle); }
 
 GLuint Shader::getHandle() const { return handle; }
@@ -41,9 +41,7 @@ bool Shader::checkCompileState() const {
   return success;
 }
 
-void Shader::fromFile(const utils::fs::path& filename) const {
-  this->fromString(readFile(filename));
-}
+void Shader::fromFile(const utils::fs::path& filename) const { this->fromString(readFile(filename)); }
 
 void Shader::fromString(const std::string& shaderCode) const {
   auto shaderCodePointer = shaderCode.c_str();

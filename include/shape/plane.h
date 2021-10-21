@@ -21,8 +21,9 @@ class Plane final : public Shape {
                                float height = 1,
                                bool scaleTexture = true);
 
-  void draw() const noexcept override;
-  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Plane"; }
+  void draw() const override;
+  CONSTEXPR_VIRTUAL const char* getTypeName() const override { return "Plane"; }
+  CONSTEXPR_VIRTUAL ShapeType getType() const override { return ShapeType::Plane; }
   template <typename... Args>
   static std::unique_ptr<Plane> make_unique(Args&&... args) {
     return std::make_unique<Plane>(std::forward<Args>(args)...);

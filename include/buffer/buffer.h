@@ -28,20 +28,20 @@ class Buffer {
 
 class ArrayBuffer final : public Buffer {
  public:
-  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Array buffer"; };
-  CONSTEXPR_VIRTUAL GLenum getType() const noexcept override { return GL_ARRAY_BUFFER; };
+  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Array buffer"; }
+  CONSTEXPR_VIRTUAL GLenum getType() const noexcept override { return GL_ARRAY_BUFFER; }
 };
 
 class ElementArrayBuffer final : public Buffer {
  public:
-  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Element array buffer"; };
-  CONSTEXPR_VIRTUAL GLenum getType() const noexcept override { return GL_ELEMENT_ARRAY_BUFFER; };
+  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Element array buffer"; }
+  CONSTEXPR_VIRTUAL GLenum getType() const noexcept override { return GL_ELEMENT_ARRAY_BUFFER; }
 };
 
 class UniformBuffer final : public Buffer {
  public:
-  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Uniform buffer"; };
-  CONSTEXPR_VIRTUAL GLenum getType() const noexcept override { return GL_UNIFORM_BUFFER; };
+  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Uniform buffer"; }
+  CONSTEXPR_VIRTUAL GLenum getType() const noexcept override { return GL_UNIFORM_BUFFER; }
   void bindUniformBlockIndex(GLuint index, GLuint offset, GLuint _size) const noexcept;
   void bindUniformBlockIndex(GLuint index) const noexcept;
 };

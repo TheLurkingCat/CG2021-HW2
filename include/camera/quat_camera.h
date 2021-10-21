@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>

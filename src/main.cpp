@@ -228,7 +228,7 @@ int main() {
     // Render all objects
     shaderPrograms[currentShader].use();
     for (int i = 0; i < MESH_COUNT; ++i) {
-      if (meshes[i]->getTypeName()[0] == 'C') {
+      if (meshes[i]->getType() == graphics::shape::ShapeType::Cube) {
         shaderPrograms[currentShader].setUniform("isCube", 1);
       } else {
         shaderPrograms[currentShader].setUniform("isCube", 0);

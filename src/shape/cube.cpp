@@ -60,51 +60,32 @@ Cube::Cube(const std::vector<GLfloat>& vertices, const std::vector<GLuint>& indi
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Cube::draw() const noexcept {
+void Cube::draw() const {
   vao->bind();
   GLsizei indexCount = static_cast<GLsizei>(ebo->getSize() / sizeof(GLubyte));
   glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_BYTE, nullptr);
   glBindVertexArray(0);
 }
 
-void Cube::generateVertices(std::vector<GLfloat>& vertices,
-                            std::vector<GLubyte>& indices) {
+void Cube::generateVertices(std::vector<GLfloat>& vertices, std::vector<GLubyte>& indices) {
   vertices.reserve(192);
   indices.reserve(36);
   vertices = std::vector<GLfloat>{// Front
-                                  1, 1, 1, 0, 0, 1,
-                                  -1, 1, 1, 0, 0, 1,
-                                  -1, -1, 1, 0, 0, 1,
-                                  1, -1, 1, 0, 0, 1,
+                                  1, 1, 1, 0, 0, 1, -1, 1, 1, 0, 0, 1, -1, -1, 1, 0, 0, 1, 1, -1, 1, 0, 0, 1,
                                   // Right
-                                  1, 1, 1, 1, 0, 0,
-                                  1, -1, 1, 1, 0, 0,
-                                  1, -1, -1, 1, 0, 0,
-                                  1, 1, -1, 1, 0, 0,
+                                  1, 1, 1, 1, 0, 0, 1, -1, 1, 1, 0, 0, 1, -1, -1, 1, 0, 0, 1, 1, -1, 1, 0, 0,
                                   // Top
-                                  1, 1, 1, 0, 1, 0,
-                                  1, 1, -1, 0, 1, 0,
-                                  -1, 1, -1, 0, 1, 0,
-                                  -1, 1, 1, 0, 1, 0,
+                                  1, 1, 1, 0, 1, 0, 1, 1, -1, 0, 1, 0, -1, 1, -1, 0, 1, 0, -1, 1, 1, 0, 1, 0,
                                   // Left
-                                  -1, 1, 1, -1, 0, 0,
-                                  -1, 1, -1, -1, 0, 0,
-                                  -1, -1, -1, -1, 0, 0,
-                                  -1, -1, 1, -1, 0, 0,
+                                  -1, 1, 1, -1, 0, 0, -1, 1, -1, -1, 0, 0, -1, -1, -1, -1, 0, 0, -1, -1, 1, -1, 0, 0,
                                   // Bottom
-                                  -1, -1, -1, 0, -1, 0,
-                                  1, -1, -1, 0, -1, 0,
-                                  1, -1, 1, 0, -1, 0,
-                                  -1, -1, 1, 0, -1, 0,
+                                  -1, -1, -1, 0, -1, 0, 1, -1, -1, 0, -1, 0, 1, -1, 1, 0, -1, 0, -1, -1, 1, 0, -1, 0,
                                   // Back
-                                  1, -1, -1, 0, 0, -1,
-                                  -1, -1, -1, 0, 0, -1,
-                                  -1, 1, -1, 0, 0, -1,
-                                  1, 1, -1, 0, 0, -1};
+                                  1, -1, -1, 0, 0, -1, -1, -1, -1, 0, 0, -1, -1, 1, -1, 0, 0, -1, 1, 1, -1, 0, 0, -1};
 
-  indices = std::vector<GLubyte>{0, 1, 2, 2, 3, 0,         // front
-                                 4, 5, 6, 6, 7, 4,         // right
-                                 8, 9, 10, 10, 11, 8,      // top
+  indices = std::vector<GLubyte>{0,  1,  2,  2,  3,  0,    // front
+                                 4,  5,  6,  6,  7,  4,    // right
+                                 8,  9,  10, 10, 11, 8,    // top
                                  12, 13, 14, 14, 15, 12,   // left
                                  16, 17, 18, 18, 19, 16,   // bottom
                                  20, 21, 22, 22, 23, 20};  // back

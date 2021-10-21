@@ -4,8 +4,7 @@ namespace graphics::texture {
 std::array<std::unordered_map<GLenum, GLuint>, 16> Texture::currentBinding;
 GLenum Texture::currentActiveTextureUnit = GL_TEXTURE0;
 
-Texture::Texture() noexcept :
-    handle(0) { glGenTextures(1, &handle); }
+Texture::Texture() noexcept : handle(0) { glGenTextures(1, &handle); }
 
 Texture::~Texture() { glDeleteTextures(1, &handle); }
 

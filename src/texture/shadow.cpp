@@ -1,15 +1,13 @@
 #include "texture/shadow.h"
 
 namespace graphics::texture {
-Framebuffer::Framebuffer() noexcept :
-    handle(0) { glGenFramebuffers(1, &handle); }
+Framebuffer::Framebuffer() noexcept : handle(0) { glGenFramebuffers(1, &handle); }
 
 Framebuffer::~Framebuffer() { glGenFramebuffers(1, &handle); }
 
 void Framebuffer::bind() const { glBindFramebuffer(GL_DRAW_FRAMEBUFFER, handle); }
 
-ShadowMap::ShadowMap(unsigned int size) noexcept :
-    shadowSize(size) {
+ShadowMap::ShadowMap(unsigned int size) noexcept : shadowSize(size) {
   GLfloat borderColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
   bind(15);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);

@@ -5,8 +5,7 @@
 namespace graphics::shader {
 GLuint ShaderProgram::currentBinding = 0;
 
-ShaderProgram::ShaderProgram() noexcept :
-    isLinked(false), handle(glCreateProgram()), uniforms(), uniformBlocks() {}
+ShaderProgram::ShaderProgram() noexcept : isLinked(false), handle(glCreateProgram()), uniforms(), uniformBlocks() {}
 
 ShaderProgram::~ShaderProgram() { glDeleteProgram(handle); }
 
@@ -38,8 +37,7 @@ GLuint ShaderProgram::getHandle() const { return handle; }
 
 void ShaderProgram::use() const {
   // NOP if binds to the same shader program.
-  if (handle == currentBinding)
-    return;
+  if (handle == currentBinding) return;
   if (isLinked) {
     glUseProgram(handle);
     currentBinding = handle;
@@ -48,8 +46,7 @@ void ShaderProgram::use() const {
 
 GLint ShaderProgram::getUniformLocation(const char* name) const {
   auto it = uniforms.find(name);
-  if (it != uniforms.end())
-    return it->second;
+  if (it != uniforms.end()) return it->second;
   GLint location = glGetUniformLocation(handle, name);
   uniforms.insert(std::make_pair(std::string(name), location));
   return location;
@@ -57,8 +54,7 @@ GLint ShaderProgram::getUniformLocation(const char* name) const {
 
 GLuint ShaderProgram::getUniformBlockIndex(const char* name) const {
   auto it = uniformBlocks.find(name);
-  if (it != uniformBlocks.end())
-    return it->second;
+  if (it != uniformBlocks.end()) return it->second;
   GLint location = glGetUniformBlockIndex(handle, name);
   uniformBlocks.insert(std::make_pair(std::string(name), location));
   return location;

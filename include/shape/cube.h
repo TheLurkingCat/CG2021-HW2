@@ -14,11 +14,11 @@ class Cube final : public Shape {
  public:
   Cube();
   Cube(const std::vector<GLfloat>& vertices, const std::vector<GLuint>& indices);
-  static void generateVertices(std::vector<GLfloat>& vertex,
-                               std::vector<GLubyte>& index);
+  static void generateVertices(std::vector<GLfloat>& vertex, std::vector<GLubyte>& index);
 
-  void draw() const noexcept override;
-  CONSTEXPR_VIRTUAL const char* getTypeName() const noexcept override { return "Cube"; }
+  void draw() const override;
+  CONSTEXPR_VIRTUAL const char* getTypeName() const override { return "Cube"; }
+  CONSTEXPR_VIRTUAL ShapeType getType() const override { return ShapeType::Cube; }
   template <typename... Args>
   static std::unique_ptr<Cube> make_unique(Args&&... args) {
     return std::make_unique<Cube>(std::forward<Args>(args)...);

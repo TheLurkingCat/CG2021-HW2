@@ -16,26 +16,13 @@ namespace {
 void printSourceEnum(GLenum source) {
   std::cerr << "Source  : ";
   switch (source) {
-    case GL_DEBUG_SOURCE_API:
-      std::cerr << "API";
-      break;
-    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-      std::cerr << "Window system";
-      break;
-    case GL_DEBUG_SOURCE_SHADER_COMPILER:
-      std::cerr << "Shader compiler";
-      break;
-    case GL_DEBUG_SOURCE_THIRD_PARTY:
-      std::cerr << "Third party";
-      break;
-    case GL_DEBUG_SOURCE_APPLICATION:
-      std::cerr << "Application";
-      break;
-    case GL_DEBUG_SOURCE_OTHER:
-      [[fallthrough]];
-    default:
-      std::cerr << "Other";
-      break;
+    case GL_DEBUG_SOURCE_API: std::cerr << "API"; break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM: std::cerr << "Window system"; break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cerr << "Shader compiler"; break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY: std::cerr << "Third party"; break;
+    case GL_DEBUG_SOURCE_APPLICATION: std::cerr << "Application"; break;
+    case GL_DEBUG_SOURCE_OTHER: [[fallthrough]];
+    default: std::cerr << "Other"; break;
   }
   std::cerr << std::endl;
 }
@@ -43,35 +30,16 @@ void printSourceEnum(GLenum source) {
 void printTypeEnum(GLenum type) {
   std::cerr << "Type    : ";
   switch (type) {
-    case GL_DEBUG_TYPE_ERROR:
-      std::cerr << "Error";
-      break;
-    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-      std::cerr << "Deprecated behavior";
-      break;
-    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-      std::cerr << "Undefined behavior";
-      break;
-    case GL_DEBUG_TYPE_PORTABILITY:
-      std::cerr << "Portability";
-      break;
-    case GL_DEBUG_TYPE_PERFORMANCE:
-      std::cerr << "Performance";
-      break;
-    case GL_DEBUG_TYPE_MARKER:
-      std::cerr << "Marker";
-      break;
-    case GL_DEBUG_TYPE_PUSH_GROUP:
-      std::cerr << "Push group";
-      break;
-    case GL_DEBUG_TYPE_POP_GROUP:
-      std::cerr << "Pop group";
-      break;
-    case GL_DEBUG_TYPE_OTHER:
-      [[fallthrough]];
-    default:
-      std::cerr << "Other";
-      break;
+    case GL_DEBUG_TYPE_ERROR: std::cerr << "Error"; break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cerr << "Deprecated behavior"; break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: std::cerr << "Undefined behavior"; break;
+    case GL_DEBUG_TYPE_PORTABILITY: std::cerr << "Portability"; break;
+    case GL_DEBUG_TYPE_PERFORMANCE: std::cerr << "Performance"; break;
+    case GL_DEBUG_TYPE_MARKER: std::cerr << "Marker"; break;
+    case GL_DEBUG_TYPE_PUSH_GROUP: std::cerr << "Push group"; break;
+    case GL_DEBUG_TYPE_POP_GROUP: std::cerr << "Pop group"; break;
+    case GL_DEBUG_TYPE_OTHER: [[fallthrough]];
+    default: std::cerr << "Other"; break;
   }
   std::cerr << std::endl;
 }
@@ -79,33 +47,24 @@ void printTypeEnum(GLenum type) {
 void printSeverityEnum(GLenum severity) {
   std::cerr << "Severity: ";
   switch (severity) {
-    case GL_DEBUG_SEVERITY_HIGH:
-      std::cerr << "High";
-      break;
-    case GL_DEBUG_SEVERITY_MEDIUM:
-      std::cerr << "Medium";
-      break;
-    case GL_DEBUG_SEVERITY_LOW:
-      std::cerr << "Low";
-      break;
-    case GL_DEBUG_SEVERITY_NOTIFICATION:
-      [[fallthrough]];
-    default:
-      std::cerr << "Notification";
-      break;
+    case GL_DEBUG_SEVERITY_HIGH: std::cerr << "High"; break;
+    case GL_DEBUG_SEVERITY_MEDIUM: std::cerr << "Medium"; break;
+    case GL_DEBUG_SEVERITY_LOW: std::cerr << "Low"; break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION: [[fallthrough]];
+    default: std::cerr << "Notification"; break;
   }
   std::cerr << std::endl;
 }
 
-void GLAPIENTRY errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, const GLchar* message, const void*) {
+void GLAPIENTRY
+errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, const GLchar* message, const void*) {
   if (id == 131169 ||  // Allocate framebuffer
       id == 131185 ||  // Allocate buffer
       id == 131218 ||  // Shader recompile
       id == 131204     // Texture no base level
   )
     return;
-  std::cerr << std::endl
-            << "Message : " << message << std::endl;
+  std::cerr << std::endl << "Message : " << message << std::endl;
   printSeverityEnum(severity);
   printSourceEnum(source);
   printTypeEnum(type);

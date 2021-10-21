@@ -64,7 +64,7 @@ Sphere::Sphere(const std::vector<GLfloat>& vertices, const std::vector<GLuint>& 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Sphere::draw() const noexcept {
+void Sphere::draw() const {
   vao->bind();
   GLsizei indexCount = static_cast<GLsizei>(ebo->getSize() / sizeof(GLuint));
   glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
