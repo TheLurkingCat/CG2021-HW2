@@ -11,7 +11,7 @@ if ($args.count -eq 1) {
   $studentid = [string]$args[0]
   Write-Output "Packing for $studentid"
   $compress = @{
-    Path = "include", "src"
+    Path = "include", "src", "assets"
     CompressionLevel = "Optimal"
     DestinationPath = "hw2_$studentid.zip"
   }

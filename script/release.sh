@@ -22,6 +22,7 @@ extern/glm/cmake \
 extern/glm/glm \
 extern/glm/CMakeLists.txt \
 extern/glm/copying.txt \
+extern/stb \
 script/pack.ps1 \
 script/pack.sh \
 cmake \
