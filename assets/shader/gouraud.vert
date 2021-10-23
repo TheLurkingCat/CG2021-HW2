@@ -29,6 +29,7 @@ layout (std140) uniform light {
 };
 // precomputed shadow
 uniform sampler2DShadow shadowMap;
+uniform int isSpotlight;
 
 float calculateShadow(vec3 projectionCoordinate, float normalDotLight) {
     // Domain transformation to [0, 1]
@@ -74,10 +75,18 @@ void main() {
   float diffuse = 0.75 * max(normalDotLight, 0.0);
   // Specular intensity
   float specular = 0.75 * pow(max(dot(viewDirection, reflectDirection), 0.0), 8.0);
+  // Spotlight effect on specified area; reset specular & diffuse
+  float spotlightEffect = 1.0;
+  if (isSpotlight == 1) {
+    spotlightEffect = dot(normalize(lightVector), lightDirection);
+    spotlightEffect = spotlightEffect > 0.9 ? pow(spotlightEffect, 8) : 0.0;
+    specular = 1.0;
+    diffuse = 1.0;
+  }
 
   vec3 perspectiveDivision = lightSpacePosition.xyz / lightSpacePosition.w;
   float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
-  colorFactor = (ambient + attenuation * shadow * (diffuse + specular));
+  colorFactor = (ambient + attenuation * shadow * (diffuse + specular) * spotlightEffect);
   TextureCoordinate = TextureCoordinate_in;
   rawPosition = mat3(modelMatrix) * Position_in;
 }

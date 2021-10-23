@@ -15,6 +15,8 @@ layout (std140) uniform light {
   vec4 lightVector;
 } ulight;
 
+uniform int isSpotlight;
+
 void main() {
   gl_Position = ulight.lightSpaceMatrix * umodel.modelMatrix * vec4(Position_in, 1.0f);
 }
