@@ -79,7 +79,7 @@ void main() {
   float spotlightEffect = 1.0;
   if (isSpotlight == 1) {
     spotlightEffect = dot(normalize(lightVector), lightDirection);
-    spotlightEffect = spotlightEffect > 0.9 ? pow(spotlightEffect, 8) : 0.0;
+    spotlightEffect = spotlightEffect > 0.9 ? pow(spotlightEffect, 50) : 0.0;
     specular = 1.0;
     diffuse = 1.0;
   }
