@@ -8,6 +8,7 @@ set(HW2_SOURCE
   ${HW2_SOURCE_DIR}/context_manager.cpp
   ${HW2_SOURCE_DIR}/light/directionallight.cpp
   ${HW2_SOURCE_DIR}/light/pointlight.cpp
+  ${HW2_SOURCE_DIR}/light/spotlight.cpp
   ${HW2_SOURCE_DIR}/shader/program.cpp
   ${HW2_SOURCE_DIR}/shader/shader.cpp
   ${HW2_SOURCE_DIR}/shape/cube.cpp
@@ -32,6 +33,7 @@ set(HW2_HEADER
   ${HW2_INCLUDE_DIR}/light/directionallight.h
   ${HW2_INCLUDE_DIR}/light/light.h
   ${HW2_INCLUDE_DIR}/light/pointlight.h
+  ${HW2_INCLUDE_DIR}/light/spotlight.h
   ${HW2_INCLUDE_DIR}/shader/program.h
   ${HW2_INCLUDE_DIR}/shader/shader.h
   ${HW2_INCLUDE_DIR}/shape/cube.h

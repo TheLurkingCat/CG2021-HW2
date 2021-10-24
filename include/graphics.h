@@ -6,6 +6,7 @@
 #include "context_manager.h"
 #include "light/directionallight.h"
 #include "light/pointlight.h"
+#include "light/spotlight.h"
 #include "shader/program.h"
 #include "shader/shader.h"
 #include "shape/cube.h"

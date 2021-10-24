@@ -15,6 +15,7 @@ uniform sampler2D diffuseTexture;
 uniform samplerCube diffuseCubeTexture;
 uniform int isCube;
 uniform sampler2DShadow shadowMap;
+uniform int isSpotlight;
 
 float calculateShadow(vec3 projectionCoordinate, float normalDotLight) {
     // Domain transformation to [0, 1]
@@ -60,10 +61,18 @@ void main() {
   // Shadow
   vec3 perspectiveDivision = fs_in.LightSpacePosition.xyz / fs_in.LightSpacePosition.w;
   float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
+  // Spotlight effect on specified area; reset specular & diffuse
+  float spotlightEffect = 1.0;
+  if (isSpotlight == 1) {
+    spotlightEffect = dot(normalize(fs_in.lightVector.xyz), lightDirection);
+    spotlightEffect = spotlightEffect > 0.9 ? pow(spotlightEffect, 8) : 0.0;
+    specular = 1.0;
+    diffuse = 1.0;
+  }
 
   vec4 diffuseTextureColor = texture(diffuseTexture, fs_in.TextureCoordinate);
   vec4 diffuseCubeTextureColor = texture(diffuseCubeTexture, fs_in.rawPosition);
   vec3 color = isCube == 1 ? diffuseCubeTextureColor.rgb : diffuseTextureColor.rgb;
-  vec3 lighting = (ambient + attenuation * shadow * (diffuse + specular)) * color;
+  vec3 lighting = (ambient + attenuation * shadow * (diffuse + specular) * spotlightEffect) * color;
   FragColor = vec4(lighting, 1.0);
 }

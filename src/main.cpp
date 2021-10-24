@@ -29,7 +29,7 @@ int currentLight = 0;
 int currentShader = 1;
 int alignSize = 256;
 // Configs
-constexpr int LIGHT_COUNT = 2;
+constexpr int LIGHT_COUNT = 3;
 constexpr int CAMERA_COUNT = 1;
 constexpr int MESH_COUNT = 3;
 constexpr int SHADER_PROGRAM_COUNT = 3;
@@ -52,6 +52,10 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
       break;
     case GLFW_KEY_P:
       currentLight = 1;
+      isLightChanged = true;
+      break;
+    case GLFW_KEY_O:
+      currentLight = 2;
       isLightChanged = true;
       break;
     case GLFW_KEY_G: currentShader = 2; break;
@@ -101,6 +105,7 @@ int main() {
     shaderPrograms[i].setUniform("shadowMap", 1);
     shaderPrograms[i].setUniform("diffuseCubeTexture", 2);
     shaderPrograms[i].setUniform("isCube", 0);
+    shaderPrograms[i].setUniform("isSpotlight", 0);
   }
   graphics::buffer::UniformBuffer meshUBO, cameraUBO, lightUBO;
   // Calculate UBO alignment size
@@ -138,6 +143,7 @@ int main() {
   std::vector<graphics::light::LightPTR> lights;
   lights.emplace_back(graphics::light::DirectionalLight::make_unique(glm::vec3(8, 6, 6)));
   lights.emplace_back(graphics::light::PointLight::make_unique(glm::vec3(8, 6, 6)));
+  lights.emplace_back(graphics::light::Spotlight::make_unique(glm::vec3(0, 0, 15)));
   assert(lights.size() == LIGHT_COUNT);
   for (int i = 0; i < LIGHT_COUNT; ++i) {
     int offset = i * perLightOffset;
@@ -207,6 +213,11 @@ int main() {
     // Switch light uniforms if light changes
     if (isLightChanged) {
       lightUBO.bindUniformBlockIndex(2, currentLight * perLightOffset, perLightSize);
+      if (currentLight == 2) {
+        shaderPrograms[currentShader].setUniform("isSpotlight", 1);
+      } else {
+        shaderPrograms[currentShader].setUniform("isSpotlight", 0);
+      }
       isLightChanged = false;
     }
     // Render shadow first
