@@ -1,0 +1,177 @@
+From 086f08f80d42368e1bbb23f77dbeb5f9b2072ce1 Mon Sep 17 00:00:00 2001
+From: ArrmenLee <wachemanstonphoenix@gmail.com>
+Date: Tue, 26 Oct 2021 00:48:57 +0800
+Subject: [PATCH] Add TODOS
+
+---
+ assets/shader/gouraud.vert     | 13 +++++++++++++
+ assets/shader/phong.frag       | 13 +++++++++++++
+ src/light/directionallight.cpp |  5 +++++
+ src/light/pointlight.cpp       |  4 ++++
+ src/main.cpp                   | 29 +++++++++++++++++++++++++++--
+ 5 files changed, 62 insertions(+), 2 deletions(-)
+
+diff --git a/assets/shader/gouraud.vert b/assets/shader/gouraud.vert
+index 8740829..b5a6f19 100644
+--- a/assets/shader/gouraud.vert
++++ b/assets/shader/gouraud.vert
+@@ -48,6 +48,19 @@ float calculateShadow(vec3 projectionCoordinate, float normalDotLight) {
+ }
+ 
+ void main() {
++  // TODO: vertex shader
++  // Hint:
++  //       1. how to create a fragment shader:
++  //          a. the output is FragColor; FragColor = vec4(lighting * color, 1.0)
++  //          b. for point light & directional light, lighting = ambient + attenuation * shadow * (diffuse + specular)
++  //       2. attenuation
++  //          a. spotlight & pointlight: constant = 1.0, linear = 0.027, quadratic = 0.0028
++  //          b. directional light = just 0.65
++  //       3. spotlight cutoff: 30deg
++  //       4. diffuse = 0.75 * max(normal vector * light direction, 0.0)
++  //       5. specular = 0.75 ^ max(normal vector * halfway direction), 0.0), 8.0);
++  //       6. notice the difference of light direction & distance between directional light & point light
++  //       7. we've set ambient & color for you
+   // Transform vertices
+   vec4 vertexPosition = modelMatrix * vec4(Position_in, 1.0);
+   vec4 vertexNormal = normalize(normalMatrix * vec4(Normal_in, 0.0));
+diff --git a/assets/shader/phong.frag b/assets/shader/phong.frag
+index d915673..f8b0e61 100644
+--- a/assets/shader/phong.frag
++++ b/assets/shader/phong.frag
+@@ -33,6 +33,19 @@ float calculateShadow(vec3 projectionCoordinate, float normalDotLight) {
+ }
+ 
+ void main() {
++    // TODO: vertex shader
++    // Hint:
++    //       1. how to create a fragment shader:
++    //          a. the output is FragColor; FragColor = vec4(lighting * color, 1.0)
++    //          b. for point light & directional light, lighting = ambient + attenuation * shadow * (diffuse + specular)
++    //       2. attenuation
++    //          a. spotlight & pointlight: constant = 1.0, linear = 0.027, quadratic = 0.0028
++    //          b. directional light = just 0.65
++    //       3. spotlight cutoff: 30deg
++    //       4. diffuse = 0.75 * max(normal vector * light direction, 0.0)
++    //       5. specular = 0.75 ^ max(normal vector * halfway direction), 0.0), 8.0);
++    //       6. notice the difference of light direction & distance between directional light & point light
++    //       7. we've set ambient & color for you
+   vec3 normal = normalize(fs_in.Normal);
+   // Calculate some directions
+   // Directional or Positioal light
+diff --git a/src/light/directionallight.cpp b/src/light/directionallight.cpp
+index 7c200b4..b461c45 100644
+--- a/src/light/directionallight.cpp
++++ b/src/light/directionallight.cpp
+@@ -5,6 +5,11 @@ namespace graphics::light {
+ DirectionalLight::DirectionalLight(const glm::vec3& lightVector) noexcept :
+     Light(glm::vec4(lightVector, 0), glm::vec4(0, 0, 0, 0)) {
+   glm::mat4 viewProjection(1);
++  // TODO: Set view projection matrix
++  // Hint:
++  //	   1. zNear, zFar, bottom, top, left, right = -75.0, 75.0, -30.0, 30.0, -30.0, 30.0
++  //	   glm::ortho (https://glm.g-truc.net/0.9.9/api/a00665.html#ga6615d8a9d39432e279c4575313ecb456)
++  // Note: You should not use glOrtho
+   viewProjection *= glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, -75.0f, 75.0f);
+   viewProjection *= glm::lookAt(lightVector, glm::vec3(0), glm::vec3(0, 1, 0));
+   setLightSpaceMatrix(viewProjection);
+diff --git a/src/light/pointlight.cpp b/src/light/pointlight.cpp
+index e2563e5..27a215f 100644
+--- a/src/light/pointlight.cpp
++++ b/src/light/pointlight.cpp
+@@ -7,6 +7,10 @@ namespace graphics::light {
+ PointLight::PointLight(const glm::vec3& lightVector) noexcept :
+     Light(glm::vec4(lightVector, 1), glm::vec4(0, 0, 0, 1)) {
+   glm::mat4 viewProjection(1);
++  // TODO: Set view projection matrix
++  // Hint:
++  //	   glm::perspective (https://glm.g-truc.net/0.9.9/api/a00243.html#ga747c8cf99458663dd7ad1bb3a2f07787)
++  // Note: You should not use gluPerspective
+   viewProjection *= glm::perspective(glm::half_pi<float>(), 1.0f, 1.0f, 100.0f);
+   viewProjection *= glm::lookAt(lightVector, glm::vec3(0), glm::vec3(0, 1, 0));
+   setLightSpaceMatrix(viewProjection);
+diff --git a/src/main.cpp b/src/main.cpp
+index 17fa024..6558058 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -46,6 +46,10 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
+     return;
+   }
+   switch (key) {
++    // TODO: Detect key-events, to:
++    //       1. switch among directional light, point light, and spot light, or
++    //       2. switch between phong shader and gouraurd shader
++    // Note: 1 key for 1 variable change
+     case GLFW_KEY_H:
+       currentLight = 0;
+       isLightChanged = true;
+@@ -98,6 +102,11 @@ int main() {
+     shaderPrograms[i].link();
+     shaderPrograms[i].detach(&vs, &fs);
+     shaderPrograms[i].use();
++    // TODO: bind the uniform variables
++    // Hint:
++    //       1. check the inputs to the vertex shader first to know what should be bound
++    //       2. you can set other uniforms you want in this for-loop
++    //       3. check ShaderProgram class to know how to bind more easily
+     shaderPrograms[i].uniformBlockBinding("model", 0);
+     shaderPrograms[i].uniformBlockBinding("camera", 1);
+     shaderPrograms[i].uniformBlockBinding("light", 2);
+@@ -132,6 +141,13 @@ int main() {
+   std::vector<graphics::camera::CameraPTR> cameras;
+   cameras.emplace_back(graphics::camera::QuaternionCamera::make_unique(glm::vec3(0, 0, 15)));
+   assert(cameras.size() == CAMERA_COUNT);
++  // TODO: Bind camera object's uniform buffer
++  // Hint:
++  //       1. what should we bind -> what will be used in shader: camera's view-projection matrix's & camera
++  //          position's pointer
++  //       2. where to bind -> remind VBO figure: we have to know the offset, size of the obj wanted to bind
++  //       3. how to bind -> check spec slide to know binding procedure & trace the obj/class in the template to
++  //          call class methods
+   for (int i = 0; i < CAMERA_COUNT; ++i) {
+     int offset = i * perCameraOffset;
+     cameras[i]->initialize(OpenGLContext::getAspectRatio());
+@@ -146,6 +162,8 @@ int main() {
+   lights.emplace_back(graphics::light::PointLight::make_unique(glm::vec3(8, 6, 6)));
+   lights.emplace_back(graphics::light::Spotlight::make_unique(currentCamera->getFront(), cutoff));
+   assert(lights.size() == LIGHT_COUNT);
++  // TODO: Bind light object's buffer
++  // Hint: look what we did when binding other UBO
+   for (int i = 0; i < LIGHT_COUNT; ++i) {
+     int offset = i * perLightOffset;
+     lightUBO.load(offset, sizeof(glm::mat4), lights[i]->getLightSpaceMatrixPTR());
+@@ -157,7 +175,8 @@ int main() {
+   graphics::texture::ShadowMap shadow(maxTextureSize);
+   graphics::texture::Texture2D colorOrange, wood;
+   graphics::texture::TextureCubeMap dice;
+-  // This is a 1x1 single color texture
++  // TODO: Read texture(and set color) for objects respectively
++  // Hint: check the calss of the variable(wood, colorOrange, dice) we've created for you
+   colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
+   wood.fromFile("../assets/texture/wood.jpg");
+   dice.fromFile("../assets/texture/posx.jpg", "../assets/texture/negx.jpg", "../assets/texture/posy.jpg",
+@@ -194,6 +213,8 @@ int main() {
+   }
+   assert(meshes.size() == MESH_COUNT);
+   assert(diffuseTextures.size() == MESH_COUNT);
++  // TODO: Bind light object's buffer
++  // Hint: look what we did when binding other UBO
+   for (int i = 0; i < MESH_COUNT; ++i) {
+     int offset = i * perMeshOffset;
+     meshUBO.load(offset, sizeof(glm::mat4), meshes[i]->getModelMatrixPTR());
+@@ -220,7 +241,11 @@ int main() {
+         lightUBO.load(offset + sizeof(glm::mat4), sizeof(glm::vec4), glm::value_ptr(front));
+       }
+     }
+-    // Switch light uniforms if light changes
++    // TODO: Switch light uniforms if light changes
++    // Hint:
++    //       1. we've load all the lights' unifroms eariler, so here we just tell shader where to start binding
++    //       the next light info
++    //       2. you should not to bind the same light every time, because we are in a while-loop
+     if (isLightChanged) {
+       int offset = currentLight * perLightOffset;
+       lightUBO.bindUniformBlockIndex(2, offset, perLightSize);
+-- 
+2.20.1.windows.1
+
