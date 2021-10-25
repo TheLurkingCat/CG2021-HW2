@@ -24,12 +24,13 @@ layout (std140) uniform camera {
 layout (std140) uniform light {
   // Projection * View matrix
   mat4 lightSpaceMatrix;
-  // Position of the light
+  // Position or direction of the light
   vec4 lightVector;
+  // inner cutoff, outer cutoff, isSpotlight, isPointLight
+  vec4 coefficients;
 };
 // precomputed shadow
 uniform sampler2DShadow shadowMap;
-uniform int isSpotlight;
 
 float calculateShadow(vec3 projectionCoordinate, float normalDotLight) {
     // Domain transformation to [0, 1]
@@ -56,16 +57,26 @@ void main() {
   // Calculate some directions
   // Directional or Positioal light
   vec4 lightDirection;
+  vec4 viewDirection = normalize(viewPosition - vertexPosition);
   float attenuation;
-  if (lightVector.w == 0.0) {
+  if (coefficients.z != 0){
+    // Spotlight use lightVector as direction
+    lightDirection = -normalize(lightVector);
+    float theta = dot(lightDirection, viewDirection);
+    float epsilon = coefficients.x - coefficients.y;
+    float distance = length(viewPosition - vertexPosition);
+    float intensity = clamp((theta - coefficients.y) / epsilon, 0.0, 1.0);
+    attenuation = intensity / (1.0 + 0.014 * distance + 0.0007 * (distance * distance));
+  } else if (coefficients.w != 0.0) {
+    // Directionlight use lightVector as direction
     lightDirection = normalize(lightVector);
     attenuation = 0.65;
   } else {
+    // Pointlight use lightVector as position
     lightDirection = normalize(lightVector - vertexPosition);
     float distance = length(lightVector - vertexPosition);
     attenuation = 1.0 / (1.0 + 0.027 * distance + 0.0028 * (distance * distance));
   }
-  vec4 viewDirection = normalize(viewPosition - vertexPosition);
   vec4 reflectDirection = reflect(-lightDirection, vertexNormal);
 
   // Ambient intensity
@@ -75,18 +86,10 @@ void main() {
   float diffuse = 0.75 * max(normalDotLight, 0.0);
   // Specular intensity
   float specular = 0.75 * pow(max(dot(viewDirection, reflectDirection), 0.0), 8.0);
-  // Spotlight effect on specified area; reset specular & diffuse
-  float spotlightEffect = 1.0;
-  if (isSpotlight == 1) {
-    spotlightEffect = dot(normalize(lightVector), lightDirection);
-    spotlightEffect = spotlightEffect > 0.9 ? pow(spotlightEffect, 50) : 0.0;
-    specular = 1.0;
-    diffuse = 1.0;
-  }
 
   vec3 perspectiveDivision = lightSpacePosition.xyz / lightSpacePosition.w;
   float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
-  colorFactor = (ambient + attenuation * shadow * (diffuse + specular) * spotlightEffect);
+  colorFactor = (ambient + attenuation * shadow * (diffuse + specular));
   TextureCoordinate = TextureCoordinate_in;
   rawPosition = mat3(modelMatrix) * Position_in;
 }

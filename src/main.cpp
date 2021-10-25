@@ -24,7 +24,7 @@ namespace {
 graphics::camera::Camera* currentCamera = nullptr;
 // Control variables
 bool isWindowSizeChanged = false;
-bool isLightChanged = false;
+bool isLightChanged = true;
 int currentLight = 0;
 int currentShader = 1;
 int alignSize = 256;
@@ -112,7 +112,7 @@ int main() {
   glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignSize);
   constexpr int perMeshSize = 2 * sizeof(glm::mat4);
   constexpr int perCameraSize = sizeof(glm::mat4) + sizeof(glm::vec4);
-  constexpr int perLightSize = sizeof(glm::mat4) + sizeof(glm::vec4);
+  constexpr int perLightSize = sizeof(glm::mat4) + 2 * sizeof(glm::vec4);
   int perMeshOffset = uboAlign(perMeshSize);
   int perCameraOffset = uboAlign(perCameraSize);
   int perLightOffset = uboAlign(perLightSize);
@@ -140,15 +140,18 @@ int main() {
   }
   currentCamera = cameras[0].get();
   // Lights
+  glm::vec2 cutoff = glm::vec2(cos(glm::radians(5.0f)), glm::cos(glm::radians(22.0f)));
   std::vector<graphics::light::LightPTR> lights;
   lights.emplace_back(graphics::light::DirectionalLight::make_unique(glm::vec3(8, 6, 6)));
   lights.emplace_back(graphics::light::PointLight::make_unique(glm::vec3(8, 6, 6)));
-  lights.emplace_back(graphics::light::Spotlight::make_unique(glm::vec3(0, 0, 15)));
+  lights.emplace_back(graphics::light::Spotlight::make_unique(currentCamera->getFront(), cutoff));
   assert(lights.size() == LIGHT_COUNT);
   for (int i = 0; i < LIGHT_COUNT; ++i) {
     int offset = i * perLightOffset;
     lightUBO.load(offset, sizeof(glm::mat4), lights[i]->getLightSpaceMatrixPTR());
     lightUBO.load(offset + sizeof(glm::mat4), sizeof(glm::vec4), lights[i]->getLightVectorPTR());
+    lightUBO.load(offset + sizeof(glm::mat4) + sizeof(glm::vec4), sizeof(glm::vec4),
+                  lights[i]->getLightCoefficientsPTR());
   }
   // Texture
   graphics::texture::ShadowMap shadow(maxTextureSize);
@@ -209,14 +212,23 @@ int main() {
       isWindowSizeChanged = false;
       cameraUBO.load(0, sizeof(glm::mat4), currentCamera->getViewProjectionMatrixPTR());
       cameraUBO.load(sizeof(glm::mat4), sizeof(glm::vec4), currentCamera->getPositionPTR());
+      if (lights[currentLight]->getType() == graphics::light::LightType::Spot) {
+        lights[currentLight]->update(currentCamera->getViewMatrix());
+        int offset = currentLight * perLightOffset;
+        glm::vec4 front = currentCamera->getFront();
+        lightUBO.load(offset, sizeof(glm::mat4), lights[currentLight]->getLightSpaceMatrixPTR());
+        lightUBO.load(offset + sizeof(glm::mat4), sizeof(glm::vec4), glm::value_ptr(front));
+      }
     }
     // Switch light uniforms if light changes
     if (isLightChanged) {
-      lightUBO.bindUniformBlockIndex(2, currentLight * perLightOffset, perLightSize);
-      if (currentLight == 2) {
-        shaderPrograms[currentShader].setUniform("isSpotlight", 1);
-      } else {
-        shaderPrograms[currentShader].setUniform("isSpotlight", 0);
+      int offset = currentLight * perLightOffset;
+      lightUBO.bindUniformBlockIndex(2, offset, perLightSize);
+      if (lights[currentLight]->getType() == graphics::light::LightType::Spot) {
+        lights[currentLight]->update(currentCamera->getViewMatrix());
+        glm::vec4 front = currentCamera->getFront();
+        lightUBO.load(offset, sizeof(glm::mat4), lights[currentLight]->getLightSpaceMatrixPTR());
+        lightUBO.load(offset + sizeof(glm::mat4), sizeof(glm::vec4), glm::value_ptr(front));
       }
       isLightChanged = false;
     }

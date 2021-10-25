@@ -13,6 +13,8 @@ class Camera {
 
   glm::vec4 getPosition() const { return glm::vec4(position, 1.0); }
   const float* getPositionPTR() const { return glm::value_ptr(position); }
+  glm::vec4 getFront() const { return glm::vec4(front, 0.0); }
+  const float* getFrontPTR() const { return glm::value_ptr(front); }
   glm::mat4 getProjectionMatrix() const { return projectionMatrix; }
   const float* getProjectionMatrixPTR() const { return glm::value_ptr(projectionMatrix); }
   glm::mat4 getViewMatrix() const { return viewMatrix; }

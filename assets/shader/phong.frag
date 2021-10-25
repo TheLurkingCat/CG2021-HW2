@@ -8,14 +8,14 @@ in VS_OUT {
   vec4 LightSpacePosition;
   flat vec4 lightVector;
   flat vec4 viewPosition;
+  flat vec4 lightCoefficients;
   vec3 rawPosition;
 } fs_in;
 
 uniform sampler2D diffuseTexture;
 uniform samplerCube diffuseCubeTexture;
-uniform int isCube;
 uniform sampler2DShadow shadowMap;
-uniform int isSpotlight;
+uniform int isCube;
 
 float calculateShadow(vec3 projectionCoordinate, float normalDotLight) {
     // Domain transformation to [0, 1]
@@ -37,16 +37,26 @@ void main() {
   // Calculate some directions
   // Directional or Positioal light
   vec3 lightDirection;
+  vec3 viewDirection = normalize(fs_in.viewPosition.xyz - fs_in.Position);
   float attenuation;
-  if (fs_in.lightVector.w == 0.0) {
+  if (fs_in.lightCoefficients.z != 0) {
+    // Spotlight use lightVector as direction
+    lightDirection = -normalize(fs_in.lightVector.xyz);
+    float theta = dot(lightDirection, viewDirection);
+    float epsilon = fs_in.lightCoefficients.x - fs_in.lightCoefficients.y;
+    float distance = length(fs_in.viewPosition.xyz - fs_in.Position);
+    float intensity = clamp((theta - fs_in.lightCoefficients.y) / epsilon, 0.0, 1.0);
+    attenuation = intensity / (1.0 + 0.014 * distance + 0.0007 * (distance * distance));
+  } else if (fs_in.lightCoefficients.w != 0) {
+    // Directionlight use lightVector as direction
     lightDirection = normalize(fs_in.lightVector.xyz);
     attenuation = 0.65;
   } else {
+    // Pointlight use lightVector as position
     lightDirection = normalize(fs_in.lightVector.xyz - fs_in.Position);
     float distance = length(fs_in.lightVector.xyz - fs_in.Position);
     attenuation = 1.0 / (1.0 + 0.027 * distance +  0.0028 * (distance * distance));
   }
-  vec3 viewDirection = normalize(fs_in.viewPosition.xyz - fs_in.Position);
   vec3 reflectDirection = reflect(-lightDirection, normal);
   vec3 halfwayDirection = normalize(lightDirection + viewDirection);
   // Ambient intensity
@@ -61,18 +71,10 @@ void main() {
   // Shadow
   vec3 perspectiveDivision = fs_in.LightSpacePosition.xyz / fs_in.LightSpacePosition.w;
   float shadow = perspectiveDivision.z > 1.0 ? 1.0 : calculateShadow(perspectiveDivision, normalDotLight);
-  // Spotlight effect on specified area; reset specular & diffuse
-  float spotlightEffect = 1.0;
-  if (isSpotlight == 1) {
-    spotlightEffect = dot(normalize(fs_in.lightVector.xyz), lightDirection);
-    spotlightEffect = spotlightEffect > 0.9 ? pow(spotlightEffect, 8) : 0.0;
-    specular = 1.0;
-    diffuse = 1.0;
-  }
 
   vec4 diffuseTextureColor = texture(diffuseTexture, fs_in.TextureCoordinate);
   vec4 diffuseCubeTextureColor = texture(diffuseCubeTexture, fs_in.rawPosition);
   vec3 color = isCube == 1 ? diffuseCubeTextureColor.rgb : diffuseTextureColor.rgb;
-  vec3 lighting = (ambient + attenuation * shadow * (diffuse + specular) * spotlightEffect) * color;
+  vec3 lighting = (ambient + attenuation * shadow * (diffuse + specular)) * color;
   FragColor = vec4(lighting, 1.0);
 }

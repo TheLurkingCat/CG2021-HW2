@@ -10,6 +10,7 @@ out VS_OUT {
   vec4 LightSpacePosition;
   flat vec4 lightVector;
   flat vec4 viewPosition;
+  flat vec4 lightCoefficients;
   vec3 rawPosition;
 } vs_out;
 
@@ -30,8 +31,10 @@ layout (std140) uniform camera {
 layout (std140) uniform light {
   // Projection * View matrix
   mat4 lightSpaceMatrix;
-  // Position of the light
+  // Position or direction of the light
   vec4 lightVector;
+  // inner cutoff, outer cutoff, isSpotlight, isPointLight
+  vec4 coefficients;
 };
 
 void main() {
@@ -41,6 +44,7 @@ void main() {
   vs_out.LightSpacePosition = lightSpaceMatrix * vec4(vs_out.Position, 1.0);
   vs_out.lightVector = lightVector;
   vs_out.viewPosition = viewPosition;
+  vs_out.lightCoefficients = coefficients;
   vs_out.rawPosition = mat3(modelMatrix) * Position_in;
   gl_Position = viewProjectionMatrix * modelMatrix * vec4(Position_in, 1.0);
 }

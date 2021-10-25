@@ -6,17 +6,17 @@ layout (std140) uniform model {
   mat4 modelMatrix;
   // inverse(transpose(model)), precalculate using CPU for efficiency
   mat4 normalMatrix;
-} umodel;
+};
 
 layout (std140) uniform light {
   // Projection * View matrix
   mat4 lightSpaceMatrix;
-  // Position of the light
+  // Position or direction of the light
   vec4 lightVector;
-} ulight;
-
-uniform int isSpotlight;
+  // inner cutoff, outer cutoff, isSpotlight, isPointLight
+  vec4 coefficients;
+};
 
 void main() {
-  gl_Position = ulight.lightSpaceMatrix * umodel.modelMatrix * vec4(Position_in, 1.0f);
+  gl_Position = lightSpaceMatrix * modelMatrix * vec4(Position_in, 1.0f);
 }

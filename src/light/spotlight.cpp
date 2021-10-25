@@ -1,14 +1,20 @@
-#include <utility>
 #include "light/spotlight.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace graphics::light {
-Spotlight::Spotlight(const glm::vec3& lightVector) noexcept : Light(glm::vec4(lightVector, 1)) {
-  glm::mat4 viewProjection(1);
-  viewProjection *= glm::perspective(glm::half_pi<float>(), 1.0f, 1.0f, 100.0f);
-  viewProjection *= glm::lookAt(lightVector, glm::vec3(0), glm::vec3(0, 1, 0));
-  setLightSpaceMatrix(viewProjection);
+Spotlight::Spotlight(const glm::vec4& lightdir, const glm::vec2& lightcoef) noexcept :
+    Light(lightdir, glm::vec4(lightcoef, 1, 0)) {
+  projectionMatrix = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, -75.0f, 75.0f);
 }
-SpotlightPTR Spotlight::make_unique(const glm::vec3& lightVector) { return std::make_unique<Spotlight>(lightVector); }
+
+void Spotlight::update(const glm::mat4& viewMatrix) { setLightSpaceMatrix(projectionMatrix * viewMatrix); }
+
+SpotlightPTR Spotlight::make_unique(const glm::vec3& lightdir, const glm::vec2& lightcoef) {
+  return std::make_unique<Spotlight>(glm::vec4(lightdir, 0.0), lightcoef);
+}
+
+SpotlightPTR Spotlight::make_unique(const glm::vec4& lightdir, const glm::vec2& lightcoef) {
+  return std::make_unique<Spotlight>(lightdir, lightcoef);
+}
 }  // namespace graphics::light

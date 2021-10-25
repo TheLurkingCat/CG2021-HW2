@@ -3,13 +3,6 @@
 namespace graphics::camera {
 bool QuaternionCamera::move(GLFWwindow* window) {
   bool ismoved = false;
-  // Calculate dt
-  static float lastFrameTime = static_cast<float>(glfwGetTime());
-  float currentFrameTime = static_cast<float>(glfwGetTime());
-  float deltaTime = currentFrameTime - lastFrameTime;
-  lastFrameTime = currentFrameTime;
-  float keyboardspeed = deltaTime * keyboardMoveSpeed;
-  float mousespeed = deltaTime * mouseMoveSpeed;
   // Mouse part
   static double lastx = 0, lasty = 0;
   if (lastx == 0 && lasty == 0) {
@@ -17,8 +10,8 @@ bool QuaternionCamera::move(GLFWwindow* window) {
   } else {
     double xpos, ypos;
     glfwGetCursorPos(window, &xpos, &ypos);
-    float dx = mousespeed * static_cast<float>(xpos - lastx);
-    float dy = mousespeed * static_cast<float>(lasty - ypos);
+    float dx = mouseMoveSpeed * static_cast<float>(xpos - lastx);
+    float dy = mouseMoveSpeed * static_cast<float>(lasty - ypos);
     lastx = xpos;
     lasty = ypos;
     if (dx != 0 || dy != 0) {
@@ -30,16 +23,16 @@ bool QuaternionCamera::move(GLFWwindow* window) {
   }
   // Keyboard part
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    position += front * keyboardspeed;
+    position += front * keyboardMoveSpeed;
     ismoved = true;
   } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    position -= front * keyboardspeed;
+    position -= front * keyboardMoveSpeed;
     ismoved = true;
   } else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    position -= right * keyboardspeed;
+    position -= right * keyboardMoveSpeed;
     ismoved = true;
   } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    position += right * keyboardspeed;
+    position += right * keyboardMoveSpeed;
     ismoved = true;
   }
   // Update view matrix if moved
