@@ -1,15 +1,18 @@
-From 086f08f80d42368e1bbb23f77dbeb5f9b2072ce1 Mon Sep 17 00:00:00 2001
-From: ArrmenLee <wachemanstonphoenix@gmail.com>
-Date: Tue, 26 Oct 2021 00:48:57 +0800
-Subject: [PATCH] Add TODOS
+From d36a43779569176420f5e0b1ddf50035bafdf6f7 Mon Sep 17 00:00:00 2001
+From: Wachemanston <wachemanstonphoenix@gmail.com>
+Date: Tue, 26 Oct 2021 01:16:43 +0800
+Subject: [PATCH] Add TODOS (#2)
+
+* Add TODOS
 
 ---
- assets/shader/gouraud.vert     | 13 +++++++++++++
- assets/shader/phong.frag       | 13 +++++++++++++
- src/light/directionallight.cpp |  5 +++++
- src/light/pointlight.cpp       |  4 ++++
- src/main.cpp                   | 29 +++++++++++++++++++++++++++--
- 5 files changed, 62 insertions(+), 2 deletions(-)
+ assets/shader/gouraud.vert     |  13 +++
+ assets/shader/phong.frag       |  13 +++
+ script/homework.patch          | 177 +++++++++++++++++++++++++++++++++
+ src/light/directionallight.cpp |   5 +
+ src/light/pointlight.cpp       |   4 +
+ src/main.cpp                   |  29 +++++-
+ 6 files changed, 239 insertions(+), 2 deletions(-)
 
 diff --git a/assets/shader/gouraud.vert b/assets/shader/gouraud.vert
 index 8740829..b5a6f19 100644
