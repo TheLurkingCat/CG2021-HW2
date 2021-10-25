@@ -46,6 +46,10 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
     return;
   }
   switch (key) {
+    // TODO: Detect key-events, to:
+    //       1. switch among directional light, point light, and spot light, or
+    //       2. switch between phong shader and gouraurd shader
+    // Note: 1 key for 1 variable change
     case GLFW_KEY_H:
       currentLight = 0;
       isLightChanged = true;
@@ -98,6 +102,11 @@ int main() {
     shaderPrograms[i].link();
     shaderPrograms[i].detach(&vs, &fs);
     shaderPrograms[i].use();
+    // TODO: bind the uniform variables
+    // Hint:
+    //       1. check the inputs to the vertex shader first to know what should be bound
+    //       2. you can set other uniforms you want in this for-loop
+    //       3. check ShaderProgram class to know how to bind more easily
     shaderPrograms[i].uniformBlockBinding("model", 0);
     shaderPrograms[i].uniformBlockBinding("camera", 1);
     shaderPrograms[i].uniformBlockBinding("light", 2);
@@ -132,6 +141,13 @@ int main() {
   std::vector<graphics::camera::CameraPTR> cameras;
   cameras.emplace_back(graphics::camera::QuaternionCamera::make_unique(glm::vec3(0, 0, 15)));
   assert(cameras.size() == CAMERA_COUNT);
+  // TODO: Bind camera object's uniform buffer
+  // Hint:
+  //       1. what should we bind -> what will be used in shader: camera's view-projection matrix's & camera
+  //          position's pointer
+  //       2. where to bind -> remind VBO figure: we have to know the offset, size of the obj wanted to bind
+  //       3. how to bind -> check spec slide to know binding procedure & trace the obj/class in the template to
+  //          call class methods
   for (int i = 0; i < CAMERA_COUNT; ++i) {
     int offset = i * perCameraOffset;
     cameras[i]->initialize(OpenGLContext::getAspectRatio());
@@ -146,6 +162,8 @@ int main() {
   lights.emplace_back(graphics::light::PointLight::make_unique(glm::vec3(8, 6, 6)));
   lights.emplace_back(graphics::light::Spotlight::make_unique(currentCamera->getFront(), cutoff));
   assert(lights.size() == LIGHT_COUNT);
+  // TODO: Bind light object's buffer
+  // Hint: look what we did when binding other UBO
   for (int i = 0; i < LIGHT_COUNT; ++i) {
     int offset = i * perLightOffset;
     lightUBO.load(offset, sizeof(glm::mat4), lights[i]->getLightSpaceMatrixPTR());
@@ -157,7 +175,8 @@ int main() {
   graphics::texture::ShadowMap shadow(maxTextureSize);
   graphics::texture::Texture2D colorOrange, wood;
   graphics::texture::TextureCubeMap dice;
-  // This is a 1x1 single color texture
+  // TODO: Read texture(and set color) for objects respectively
+  // Hint: check the calss of the variable(wood, colorOrange, dice) we've created for you
   colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
   wood.fromFile("../assets/texture/wood.jpg");
   dice.fromFile("../assets/texture/posx.jpg", "../assets/texture/negx.jpg", "../assets/texture/posy.jpg",
@@ -194,6 +213,8 @@ int main() {
   }
   assert(meshes.size() == MESH_COUNT);
   assert(diffuseTextures.size() == MESH_COUNT);
+  // TODO: Bind light object's buffer
+  // Hint: look what we did when binding other UBO
   for (int i = 0; i < MESH_COUNT; ++i) {
     int offset = i * perMeshOffset;
     meshUBO.load(offset, sizeof(glm::mat4), meshes[i]->getModelMatrixPTR());
@@ -220,7 +241,11 @@ int main() {
         lightUBO.load(offset + sizeof(glm::mat4), sizeof(glm::vec4), glm::value_ptr(front));
       }
     }
-    // Switch light uniforms if light changes
+    // TODO: Switch light uniforms if light changes
+    // Hint:
+    //       1. we've load all the lights' unifroms eariler, so here we just tell shader where to start binding
+    //       the next light info
+    //       2. you should not to bind the same light every time, because we are in a while-loop
     if (isLightChanged) {
       int offset = currentLight * perLightOffset;
       lightUBO.bindUniformBlockIndex(2, offset, perLightSize);

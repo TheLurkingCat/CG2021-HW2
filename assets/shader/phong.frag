@@ -33,6 +33,19 @@ float calculateShadow(vec3 projectionCoordinate, float normalDotLight) {
 }
 
 void main() {
+    // TODO: vertex shader
+    // Hint:
+    //       1. how to create a fragment shader:
+    //          a. the output is FragColor; FragColor = vec4(lighting * color, 1.0)
+    //          b. for point light & directional light, lighting = ambient + attenuation * shadow * (diffuse + specular)
+    //       2. attenuation
+    //          a. spotlight & pointlight: constant = 1.0, linear = 0.027, quadratic = 0.0028
+    //          b. directional light = just 0.65
+    //       3. spotlight cutoff: 30deg
+    //       4. diffuse = 0.75 * max(normal vector * light direction, 0.0)
+    //       5. specular = 0.75 ^ max(normal vector * halfway direction), 0.0), 8.0);
+    //       6. notice the difference of light direction & distance between directional light & point light
+    //       7. we've set ambient & color for you
   vec3 normal = normalize(fs_in.Normal);
   // Calculate some directions
   // Directional or Positioal light
