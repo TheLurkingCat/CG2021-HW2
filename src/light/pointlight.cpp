@@ -5,7 +5,7 @@
 
 namespace graphics::light {
 PointLight::PointLight(const glm::vec3& lightPosition) noexcept :
-    Light(glm::vec4(lightPosition, 1), glm::vec4(0, 0, 0, 1)) {
+    Light(glm::vec4(lightPosition, 1), glm::vec4(0, 0, 0, 0)) {
   glm::mat4 viewProjection(1);
   // TODO (If you want to implement shadow): Set view projection matrix for light
   // Hint:

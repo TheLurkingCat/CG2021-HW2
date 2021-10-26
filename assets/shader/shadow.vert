@@ -13,7 +13,7 @@ layout (std140) uniform light {
   mat4 lightSpaceMatrix;
   // Position or direction of the light
   vec4 lightVector;
-  // inner cutoff, outer cutoff, isSpotlight, isPointLight
+  // inner cutoff, outer cutoff, isSpotlight, isDirectionalLight
   vec4 coefficients;
 };
 

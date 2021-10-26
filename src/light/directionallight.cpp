@@ -3,7 +3,7 @@
 
 namespace graphics::light {
 DirectionalLight::DirectionalLight(const glm::vec3& lightDirection) noexcept :
-    Light(glm::vec4(lightDirection, 0), glm::vec4(0, 0, 0, 0)) {
+    Light(glm::vec4(lightDirection, 0), glm::vec4(0, 0, 0, 1)) {
   glm::mat4 viewProjection(1);
   // TODO (If you want to implement shadow): Set view projection matrix for light
   // Hint:
