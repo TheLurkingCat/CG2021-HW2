@@ -92,6 +92,15 @@
     <ClCompile Include="..\..\src\shader\shader.cpp">
       <Filter>來源檔案\shader</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\light\spotlight.cpp">
+      <Filter>來源檔案\light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shape\cube.cpp">
+      <Filter>來源檔案\shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\texture\cubemap.cpp">
+      <Filter>來源檔案\texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\context_manager.h">
@@ -150,6 +159,15 @@
     </ClInclude>
     <ClInclude Include="..\..\include\graphics.h">
       <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\light\spotlight.h">
+      <Filter>標頭檔\light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\shape\cube.h">
+      <Filter>標頭檔\shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\texture\cubemap.h">
+      <Filter>標頭檔\texture</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
