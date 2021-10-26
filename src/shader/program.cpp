@@ -45,6 +45,7 @@ void ShaderProgram::use() const {
 }
 
 GLint ShaderProgram::getUniformLocation(const char* name) const {
+  // Cache the location since glGetUniformLocation calls are expensive
   auto it = uniforms.find(name);
   if (it != uniforms.end()) return it->second;
   GLint location = glGetUniformLocation(handle, name);
@@ -53,6 +54,7 @@ GLint ShaderProgram::getUniformLocation(const char* name) const {
 }
 
 GLuint ShaderProgram::getUniformBlockIndex(const char* name) const {
+  // Cache the location since glGetUniformBlockIndex calls are expensive
   auto it = uniformBlocks.find(name);
   if (it != uniformBlocks.end()) return it->second;
   GLint location = glGetUniformBlockIndex(handle, name);

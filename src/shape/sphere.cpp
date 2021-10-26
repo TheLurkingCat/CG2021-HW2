@@ -72,7 +72,7 @@ void Sphere::draw() const {
 }
 
 void Sphere::generateVertices(std::vector<GLfloat>& vertices, std::vector<GLuint>& indices, int stack, int slice) {
-  // http://www.songho.ca/opengl/gl_sphere.html#sphere
+  // See http://www.songho.ca/opengl/gl_sphere.html#sphere if you don't know how to create a sphere.
   vertices.reserve(8 * (stack + 1) * (slice + 1));
   indices.reserve(6 * stack * slice);
 

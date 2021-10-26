@@ -28,7 +28,8 @@ bool isLightChanged = true;
 int currentLight = 0;
 int currentShader = 1;
 int alignSize = 256;
-// Configs
+// TODO (optional): Configs
+// You should change line 32-35 if you add more shader / light / camera / mesh.
 constexpr int LIGHT_COUNT = 3;
 constexpr int CAMERA_COUNT = 1;
 constexpr int MESH_COUNT = 3;
@@ -83,8 +84,6 @@ int main() {
   glfwSetKeyCallback(window, keyCallback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetFramebufferSizeCallback(window, resizeCallback);
-  glEnable(GL_PRIMITIVE_RESTART);
-  glPrimitiveRestartIndex(65535);
 #ifndef NDEBUG
   OpenGLContext::printSystemInfo();
   // This is useful if you want to debug your OpenGL API calls.
@@ -104,9 +103,20 @@ int main() {
     shaderPrograms[i].use();
     // TODO: bind the uniform variables
     // Hint:
-    //       1. check the inputs to the vertex shader first to know what should be bound
-    //       2. you can set other uniforms you want in this for-loop
-    //       3. check ShaderProgram class to know how to bind more easily
+    //       1. you can set other uniforms you want in this for-loop
+    //       2. check ShaderProgram class to know how to bind more easily
+    //       3. It's safe to find and bind a non-exist uniform, it will just become NOP
+    // Note:
+    //       1. glUniform
+    //        https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glUniform.xhtml
+    //       2. glGetUniformLocation
+    //        https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glGetUniformLocation.xhtml
+    //       3. glUniformBlockBinding
+    //        https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glUniformBlockBinding.xhtml
+    //       4. glGetUniformBlockIndex
+    //        https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glGetUniformBlockIndex.xhtml
+    //       5. Check uniformBlockBinding and setUniform member function of ShaderProgram class
+
     shaderPrograms[i].uniformBlockBinding("model", 0);
     shaderPrograms[i].uniformBlockBinding("camera", 1);
     shaderPrograms[i].uniformBlockBinding("light", 2);
@@ -114,7 +124,6 @@ int main() {
     shaderPrograms[i].setUniform("shadowMap", 1);
     shaderPrograms[i].setUniform("diffuseCubeTexture", 2);
     shaderPrograms[i].setUniform("isCube", 0);
-    shaderPrograms[i].setUniform("isSpotlight", 0);
   }
   graphics::buffer::UniformBuffer meshUBO, cameraUBO, lightUBO;
   // Calculate UBO alignment size
@@ -141,7 +150,7 @@ int main() {
   std::vector<graphics::camera::CameraPTR> cameras;
   cameras.emplace_back(graphics::camera::QuaternionCamera::make_unique(glm::vec3(0, 0, 15)));
   assert(cameras.size() == CAMERA_COUNT);
-  // TODO: Bind camera object's uniform buffer
+  // TODO (Just an example for you, no need to modify here): Bind camera object's uniform buffer
   // Hint:
   //       1. what should we bind -> what will be used in shader: camera's view-projection matrix's & camera
   //          position's pointer
@@ -175,9 +184,10 @@ int main() {
   graphics::texture::ShadowMap shadow(maxTextureSize);
   graphics::texture::Texture2D colorOrange, wood;
   graphics::texture::TextureCubeMap dice;
+  colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
   // TODO: Read texture(and set color) for objects respectively
   // Hint: check the calss of the variable(wood, colorOrange, dice) we've created for you
-  colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
+  //       fromFile member function
   wood.fromFile("../assets/texture/wood.jpg");
   dice.fromFile("../assets/texture/posx.jpg", "../assets/texture/negx.jpg", "../assets/texture/posy.jpg",
                 "../assets/texture/negy.jpg", "../assets/texture/posz.jpg", "../assets/texture/negz.jpg");
@@ -245,7 +255,7 @@ int main() {
     // Hint:
     //       1. we've load all the lights' unifroms eariler, so here we just tell shader where to start binding
     //       the next light info
-    //       2. you should not to bind the same light every time, because we are in a while-loop
+    //       2. you should not bind the same light every time, because we are in a while-loop
     if (isLightChanged) {
       int offset = currentLight * perLightOffset;
       lightUBO.bindUniformBlockIndex(2, offset, perLightSize);

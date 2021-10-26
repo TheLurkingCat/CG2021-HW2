@@ -43,6 +43,7 @@ bool QuaternionCamera::move(GLFWwindow* window) {
 }
 
 void QuaternionCamera::updateView() {
+  // TODO: paste your HW1 here
   constexpr glm::vec3 original_front(0, 0, -1);
   constexpr glm::vec3 original_up(0, 1, 0);
   front = rotation * original_front;
@@ -53,6 +54,7 @@ void QuaternionCamera::updateView() {
 }
 
 void QuaternionCamera::updateProjection(float aspectRatio) {
+  // TODO: paste your HW1 here
   constexpr float FOV = glm::radians(45.0f);
   constexpr float zNear = 0.1f;
   constexpr float zFar = 100.0f;

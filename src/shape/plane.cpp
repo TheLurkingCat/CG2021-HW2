@@ -67,7 +67,7 @@ Plane::Plane(const std::vector<GLfloat>& vertices, const std::vector<GLuint>& in
 void Plane::draw() const {
   vao->bind();
   GLsizei indexCount = static_cast<GLsizei>(ebo->getSize() / sizeof(GLuint));
-  glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
   glBindVertexArray(0);
 }
 
@@ -96,12 +96,15 @@ void Plane::generateVertices(std::vector<GLfloat>& vertices,
 
   for (int i = 0; i < subdivision; ++i) {
     int offset = i * (subdivision + 1);
-    for (int j = 0; j < subdivision + 1; ++j) {
+    for (int j = 0; j < subdivision; ++j) {
       indices.emplace_back(offset + j);
       indices.emplace_back(offset + j + subdivision + 1);
+      indices.emplace_back(offset + j + 1);
+
+      indices.emplace_back(offset + j + 1);
+      indices.emplace_back(offset + j + subdivision + 1);
+      indices.emplace_back(offset + j + subdivision + 2);
     }
-    // Primitive restart
-    indices.emplace_back(65535);
   }
 }
 }  // namespace graphics::shape
