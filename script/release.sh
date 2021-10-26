@@ -28,6 +28,7 @@ script/pack.sh \
 cmake \
 vs2019 \
 include \
+assets \
 src \
 .clang-format \
 CMakeLists.txt \
